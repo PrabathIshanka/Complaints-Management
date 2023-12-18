@@ -31,9 +31,9 @@ class NavCollapse extends Component {
         item = collapses[item];
 
         let isCountHaveProp = false;
-        let isHaveData = this.props.loggedReducer.userWiseAuthorization.filter(
+        let isHaveData ={};/* this.props.loggedReducer.userWiseAuthorization.filter(
           (e) => e.MenuID === item.id && e.Auth == 2
-        );
+        );*/
         if (isHaveData.length > 0) {
           isCountHaveProp = true;
         }

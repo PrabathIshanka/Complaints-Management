@@ -22,9 +22,9 @@ const navGroup = (props) => {
       //     console.log("insode loop" + i);
       //   }
       let isCountHaveProp = false;
-      let isHaveData = props.loginData.userWiseAuthorization.filter(
+      let isHaveData ={};/* props.loginData.userWiseAuthorization.filter(
         (e) => e.MenuID === item.id && e.Auth == 2
-      );
+      );*/
       if (isHaveData.length > 0) {
         isCountHaveProp = true;
       }
