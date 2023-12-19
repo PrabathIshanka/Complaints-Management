@@ -19,7 +19,11 @@ const PasswordReset = React.lazy(() => import("./Forms/Admin/PasswordReset"));
 const UsersGroup = React.lazy(() => import("./Forms/Admin/UserGroup"));
 
 //Masters
-const Customer = React.lazy(() => import("./Forms/Master/Customer"));
+const Employee = React.lazy(() => import("./Forms/Master/Employee"));
+const Branch = React.lazy(() => import("./Forms/Master/Branch"));
+const City = React.lazy(() => import("./Forms/Master/City"));
+const Role = React.lazy(() => import("./Forms/Master/Role"));
+const CrimeType = React.lazy(() => import("./Forms/Master/CrimeType"));
 
 const routes = [
   {
@@ -83,10 +87,34 @@ const routes = [
     component: UsersGroup,
   },
   {
-    path: "/forms/masters/customer",
+    path: "/forms/masters/employee",
     exact: true,
     name: "customer",
-    component: Customer,
+    component: Employee,
+  },
+  {
+    path: "/forms/masters/branch",
+    exact: true,
+    name: "branch",
+    component: Branch,
+  },
+  {
+    path: "/forms/masters/city",
+    exact: true,
+    name: "city",
+    component: City,
+  },
+  {
+    path: "/forms/masters/role",
+    exact: true,
+    name: "role",
+    component: Role,
+  },
+  {
+    path: "/forms/masters/crimetype",
+    exact: true,
+    name: "crimetype",
+    component: CrimeType,
   },
 ];
 

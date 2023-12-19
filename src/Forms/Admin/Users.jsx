@@ -34,7 +34,6 @@ export class Users extends Component {
       ListViewing: false,
       DataLoading: false,
       PasswordChange: false,
-      IsCashier: false,
       DocReadOnly: false,
     };
 

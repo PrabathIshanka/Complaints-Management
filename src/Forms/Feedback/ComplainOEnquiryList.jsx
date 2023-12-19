@@ -23,7 +23,7 @@ export class ComplainOEnquiryList extends Component {
   }
 
   onSelectionChanged = (e) => {
-    this.setState({ viewListSelectedID: e.selectedRowsData[0].AutoID });
+    this.setState({ viewListSelectedID: e.selectedRowsData[0].id });
   };
 
   onSelectClick = (e) => {
@@ -51,7 +51,7 @@ export class ComplainOEnquiryList extends Component {
             <DataGrid
               id="grid-list"
               dataSource={this.props.ComplainInquiryList}
-              keyExpr="AutoID"
+              keyExpr="id"
               showBorders={true}
               wordWrapEnabled={true}
               allowSearch={true}
@@ -62,11 +62,11 @@ export class ComplainOEnquiryList extends Component {
               <SearchPanel visible={true} />
               <GroupPanel visible={true} />
               <Paging defaultPageSize={12} />
-              <Column dataField="AutoID" visible={false} />
-              <Column dataField="ComplainNo" />
-              <Column dataField="PriorityLevel" />
-              <Column dataField="ComplainType" />
-              <Column dataField="ComplainStatus" />
+              <Column dataField="id" visible={false} />
+              <Column dataField="crimeTypeId" />
+              <Column dataField="inquiryEntry" />
+              <Column dataField="userComment" />
+              <Column dataField="rating" />
             </DataGrid>
 
             <br></br>

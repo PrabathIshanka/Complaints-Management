@@ -104,7 +104,7 @@ class SignUp1 extends Component {
                   <p className="mb-0 text-muted">Don’t have an account? <NavLink to="/auth/signup-1">Signup</NavLink></p>
 
                   <p className="mb-0 text-muted">
-                    Design and Developed by: Perfect Business Solution Services
+                    Design and Developed by: Team Trojans
                     (Pvt) Ltd
                   </p>
                   <p className="mb-0 text-muted">Version 1.0.0</p>

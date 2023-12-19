@@ -237,9 +237,9 @@ class SignUp1 extends React.Component {
     render() {
         return (
             <Aux>
-                <Card title="User">
+                <Card title="">
           <Form ref={this.FormRef} formData={this.state.jUser}>
-            <GroupItem caption="User Information" colCount={2}>
+            <GroupItem caption="Register" colCount={2}>
               <Item
                 dataField="firstName"
                 editorOptions={{
