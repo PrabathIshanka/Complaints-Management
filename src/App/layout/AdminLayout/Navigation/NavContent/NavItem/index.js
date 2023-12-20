@@ -34,11 +34,11 @@ class NavItem extends Component {
       // console.log("asdasdasdas");
       // console.log(this.props.loggedReducer.userWiseAuthorization);
       let isCountHaveProp = false;
-      let isHaveData = this.props.loggedReducer.userWiseAuthorization.filter(
+      let isHaveData ={};/* this.props.loggedReducer.userWiseAuthorization.filter(
         (e) =>
           e.MenuID === this.props.item.id &&
           e.Auth == 2
-      );
+      );*/
 
       // console.log("this.props.item.DocumentName", this.props.item.DocumentName)
       // console.log("this.props.loggedReducer.userWiseAuthorization", this.props.loggedReducer.userWiseAuthorization)

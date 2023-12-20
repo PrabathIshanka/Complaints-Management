@@ -1,845 +1,435 @@
-import Form, { Item, GroupItem, Label } from "devextreme-react/form";
 import React, { Component } from "react";
+import Aux from "../../hoc/_Aux";
 import Card from "../../App/components/MainCard";
-import { Button, Navbar } from "react-bootstrap";
+import Form, {
+  Item,
+  GroupItem,
+  RequiredRule,
+  EmailRule,
+  Label,
+  PatternRule,
+  EmptyItem,
+} from "devextreme-react/form";
+import { Button, Navbar, Nav } from "react-bootstrap";
 import List from "./ComplainOEnquiryList";
-import { LoadPanel } from "devextreme-react";
-import DataGrid, {
-  Column,
-  SearchPanel,
-  GroupPanel,
-  Paging,
-  Editing,
-  Lookup,
-  Popup,
-} from "devextreme-react/data-grid";
-
-import { FileUploader } from "devextreme-react";
-import notify from "devextreme/ui/notify";
+import { TreeList, Editing, Column, Lookup } from "devextreme-react/tree-list";
+import { Switch, Route } from "react-router-dom";
 import Swal from "sweetalert2";
 import axios from "axios";
-import UploadAttchment from "../UploadAttachmentTemplate/UploadAttchment";
+import notify from "devextreme/ui/notify";
+import { SelectBox, TagBox } from "devextreme-react";
+import { LoadPanel } from "devextreme-react/load-panel";
+import { connect } from "react-redux";
+import FileUploader from 'devextreme-react/file-uploader';
+import RangeSelector, {
+  Margin, Background, Image, Indent, SliderMarker, Scale, TickInterval, MinorTickInterval
+} from 'devextreme-react/range-selector';
 
 export class ComplainOEnquiry extends Component {
   constructor(props) {
     super(props);
     this.state = {
+
+      File: null,
+      FileName: null,
+      base64Image:null,
+      base64ImageInvestigate:null,
+
       ComplainID: 0,
-      jComplain: {},
+      jComplain: { Status: 0 },
+      jCrimeType:[],
+      jBranch:[],
+      jAuthorization: [],
 
-      jlDefectTypes: [],
-      jlCustomers: [],
-      jlArea: [],
-      jlUser: [],
-      jlBank: [],
-      jlCategory: [],
-      jlItem: [],
-      jComplainAttachment: [],
-      UploadAttchment: false,
-      FileInfo: {},
+      jComplainList: [],
+      SelectID:0,
 
-      SelectedID: 0,
-      ComplainInquiryList: [],
-      LoadPanelVisible: false,
       ListViewing: false,
-      DocumentID: 5001,
-      jComplainAction: [],
+      DataLoading: false,
+      PasswordChange: false,
+      DocReadOnly: false,
+      
+      ItemEnable : true,
     };
 
+
     this.Status = [
-      { ID: 1, Name: "Complain" },
-      { ID: 2, Name: "Inquiry" },
-      { ID: 3, Name: "Feedback" },
+      { ID: 0, Name: "Reviewing" },
+      { ID: 1, Name: "Assign To Officer" },
+      { ID: 2, Name: "Investigating" },
+      { ID: 3, Name: "Complete" },
+      { ID: 4, Name: "Closed" },
     ];
-    this.Status01 = [
-      { ID: 1, Name: "Active" },
-      { ID: 2, Name: "Inactive" },
-      { ID: 3, Name: "Completed" },
-    ];
-    this.PriorityLevel = [
-      { ID: 1, Name: "High" },
-      { ID: 2, Name: "Medium" },
-      { ID: 3, Name: "Low" },
-    ];
-    this.ProductType = [
-      { ID: 1, Name: "Product Relq" },
-      { ID: 2, Name: "Inquiry" },
-      { ID: 3, Name: "Feedback" },
-    ];
-    this.AnswerResult = [
-      { ID: 1, Name: "Poor" },
-      { ID: 2, Name: "Fair" },
-      { ID: 3, Name: "Good" },
-      { ID: 4, Name: "Better" },
-      { ID: 5, Name: "Best" },
-    ];
+    this.Institute = [
+      { ID: 0, Name: "Wildlife conservations" },
+      { ID: 1, Name: "Forest conservations" },
+  ];
+
+    this.onLoadPanelHiding = this.onLoadPanelHiding.bind(this);
+    this.FormRef = React.createRef();
   }
 
-  componentDidMount = () => {
-    this.onInitializeForm();
-  };
 
-  onInitializeForm = () => {
-    this.setState({ LoadPanelVisible: true }, () => {
-      axios
-        .all([
-          axios.get("/api/number-series-lookup-by-module", {
-            params: { DocumentID: this.state.DocumentID },
-          }),
-          axios.get("/api/area-lookup"),
-          axios.get("/api/user-lookup"),
-          axios.get("/api/customer"),
-          axios.get("/api/category"),
-          axios.get("/api/bank-active"),
-          axios.get("/api/Item"),
-          axios.get("/api/master/list-defect-types"),
-        ])
-        .then(
-          axios.spread(
-            (req, area, user, Customer, Category, Bank, Item, defectTypes) => {
-              this.setState(
-                (prevState) => ({
-                  jComplain: {
-                    ...prevState.jComplain,
-                    ComplainNo: req.data[0].Series,
-                  },
-                  jlArea: area.data,
-                  jlUser: user.data,
-                  jlBank: Bank.data,
-                  jlCustomers: Customer.data,
-                  jlCategory: Category.data,
-                  jlItem: Item.data,
-                  jlDefectTypes: defectTypes.data,
-                }),
-                () => this.setState({ LoadPanelVisible: false })
-              );
-            }
-          )
-        )
-        .catch((error) => console.error(error));
-    });
-  };
+get FormLayout() {
+return this.FormRef.current.instance;
+}
 
-  onViewListClick = (viewListSelectedID) => {
+componentDidMount = (e) => {
+  let auth;
+  
+  axios
+    .all([
+       axios.get("http://20.201.121.161:4478/api/Branch",{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}}),
+       axios.get("http://20.201.121.161:4478/api/CrimeType",{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}}),
+    ])
+    .then(
+    axios.spread((Branch , CrimeType) => {
+      this.setState(
+        {
+          jBranch: Branch.data,
+          jCrimeType : CrimeType.data,
+        },
+        () => console.log("jRoles", this.state.jRoles)
+      );
+    }))
+    .catch((error) => console.log(error));
+  
+};
+
+onLoadPanelHiding = (message, type) => {
+this.setState({
+  LoadPanelVisible: false,
+});
+
+this.OnNotification(message, type);
+};
+
+OnNotification = (message, type) => {
+notify({
+  message: message,
+  type: type,
+  displayTime: 3000,
+  position: { at: "top right", offset: "50" },
+});
+};
+
+OnClickEvent = () => {};
+
+OnSaveValidation = async () => {
+return true;
+};
+
+SaveData = async (e) => {
+if (await this.OnSaveValidation()) {
+  Swal.fire({
+    type: "info",
+    showCancelButton: true,
+    text: "Do you want to complain ?",
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+  }).then((res) => {
+    if (res.value) {
+      this.setState({ LoadPanelVisible: true });
+      console.log( {userId: localStorage.getItem("user"),
+      crimeTypeId: this.state.jComplain.crimeTypeId,
+      inquiryEntry: this.state.jComplain.inquiryEntry
+      });
+      this.serverRequest = axios
+        .post("http://20.201.121.161:4478/api/Inquiry", {
+          userId: localStorage.getItem("user"),
+          crimeTypeId: this.state.jComplain.crimeTypeId,
+          inquiryEntry: this.state.jComplain.inquiryEntry,
+          branchId : this.state.jComplain.branchId,
+          userAttachment : this.state.base64Image
+        }, 
+        {headers:{Authorization : ("Bearer "+localStorage.getItem("token")),
+        'Content-Type': 'application/json',}})
+        .then((response) => {
+          this.onLoadPanelHiding(response.data.id, "success");
+          this.OnClearForm();
+          //this.setState({CourseID: response.data[0].CourseID});
+        })
+        .catch((error) => {
+          this.onLoadPanelHiding("Something went wrong", "error");
+          console.log(error);
+        });
+    } else if (res.dismiss == "cancel") {
+      //console.log("cancel");
+    } else if (res.dismiss == "esc") {
+      //console.log("cancle");
+    }
+  });
+}
+};
+
+OnClearForm = () => {console.log(this.state.jComplain.image)
+
+
+this.setState({
+
+  File: null,
+  FileName: null,
+  base64Image:null,
+  base64ImageInvestigate:null,
+
+  ComplainID: 0,
+      jComplain: { Status: 0 },
+      jAuthorization: [],
+
+      jComplainList: [],
+
+      ListViewing: false,
+      DataLoading: false,
+      PasswordChange: false,
+      DocReadOnly: false,
+      ItemEnable : true,
+});
+};
+  
+
+  OnListClickEvent = (SelectID) => {
     this.setState({ ListViewing: !this.state.ListViewing }, () => {
       if (this.state.ListViewing) {
         //Open
         this.serverRequest = axios
-          .get("/api/feedback/listview-complain-inquiry")
+          .get("http://20.201.121.161:4478/api/Inquiry/GetAllByUser/"+localStorage.getItem("user"),{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}})
           .then((res) => {
-            this.setState({ ComplainInquiryList: res.data });
+            console.log(res.data);
+            this.setState({ jComplainList: res.data });
           })
           .catch((error) => {
             console.log(error);
           });
       }
-      if (!this.state.ListViewing && viewListSelectedID != 0) {
+      if (!this.state.ListViewing && SelectID != 0) {console.log("TEST SELECTED ID" , SelectID);
         //Close
-        this.setState(
-          {
-            SelectedID: viewListSelectedID,
-            DataLoading: true,
-            isDocReadOnly: true,
-          },
-          () => this.OnLoadData()
-        );
+        this.setState({ ComplainID: SelectID ,
+        ItemEnable:false}, () => this.OnLoadData());
       }
     });
   };
 
-  // OnLoadData = () => {
-  //   try {
-  //     axios
-  //       .get("/api/feedback/get-complain-inquiry", {
-  //         params: {
-  //           AutoID: this.state.SelectedID,
-  //         },
-  //       })
-  //       .then((res) => {
-  //         console.log(res.data[0]);
-  //         this.setState({
-  //           ComplainID: this.state.ComplainID,
-  //           jComplain: JSON.parse(res.data[0].ComplainOInquiry),
-  //           jComplainAttachment: JSON.parse(
-  //             res.data[0].ComplainOInquiryAttachments
-  //           ),
-  //           jComplainAction: JSON.parse(res.data[0].ComplainOInquiryActionLog),
-  //         });
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //       });
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+  onValueChanged = (e) => { console.log(e );
+    this.setState({ File: e.value[0] });
 
-  onSaveClick = (e) => {
-    try {
-      axios
-        .post("/api/feedback/add-complain-inquiry", {
-          ComplainOInquiry: JSON.stringify(this.state.jComplain),
-          ComplainOInquiryAttachments: JSON.stringify(
-            this.state.jComplainAttachment
-          ),
-          ComplainOInquiryActionLog: JSON.stringify(this.state.jComplainAction),
-        })
-        .then((response) => {
-          let _newComplainID = response.data[0].NewComplainID;
-          if (_newComplainID != 0) {
-            this.onLoadPanelHiding("Successfully Saved", "success");
-            this.OnClearForm();
-          } else if (_newComplainID == 0) {
-            this.onLoadPanelHiding("Successfully Updated", "success");
-            this.OnClearForm();
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          this.onLoadPanelHiding("Something went wrong", "error");
-        });
-    } catch (error) {
-      console.log(error);
+    if (this.state.File) {
+      const reader = new FileReader();
+  
+      reader.onloadend = () => {
+        this.setState({ base64Image: reader.result });
+        const base64Image = reader.result;
+        console.log(base64Image);
+      };
+  
+      reader.readAsDataURL(this.state.File);
     }
   };
 
-  OnClearForm = () => {
-    this.setState({
-      ComplainID: 0,
-      jComplain: {},
-      jComplainAction: [],
-      jComplainAttachment: [],
-    });
-    this.onInitializeForm();
-  };
 
-  onClearClick = (e) => {
-    try {
-      this.OnClearForm();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  onLoadPanelHiding = (message, type) => {
-    this.setState({
-      LoadPanelVisible: false,
-    });
-
-    this.OnNotification(message, type);
-  };
-
-  OnNotification = (message, type) => {
-    notify({
-      message: message,
-      type: type,
-      displayTime: 3000,
-      position: { at: "top right", offset: "50" },
-    });
-  };
-
-  onChangeCategory = (e) => {
-    if (e.value) {
-      axios
-        .get("/api/category-wise-item", {
-          params: {
-            CategoryID: e.value,
-          },
+  OnLoadData() {console.log(this.state.ComplainID ,this.state.ComplainID!=0 );
+    axios
+      .all([
+        axios.get("http://20.201.121.161:4478/api/Inquiry/"+this.state.ComplainID,{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}}),
+      ])
+      .then(
+        axios.spread((Complain) => { console.log(Complain.data);
+          this.setState({ DataLoading: true }, () =>
+            this.setState(
+              {
+                jComplain: Complain.data,
+                base64Image : Complain.data.userAttachment,
+                base64ImageInvestigate:Complain.data.investigatingAttachment,
+                ItemEnable:false,
+              },
+              () =>
+              console.log("HIIIIIIII",this.state.ComplainID)
+            )
+          );
         })
-        .then((res) => {
-          this.setState({ jlItem: res.data });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
-  };
+      )
+      .catch((error) => console.log(error));
+  }
 
-  onChangeComplainType = (e) => {
-    this.setState({}); // don't remove this line
-  };
-
-  onCustomerChanged = (e) => {
-    if (e.value) {
-      axios
-        .get("/api/master/customer-by-id", {
-          params: {
-            CustomerID: e.value,
-          },
-        })
-        .then((res) => {
-          let _complaint = this.state.jComplain;
-          let _modifiedObj = {
-            ..._complaint,
-            CustomerID: res.data[0].CustomerID,
-            RegistrationNumber: res.data[0].RegistrationNo,
-            CustomerName: res.data[0].Name,
-            CusIdentificationNo: res.data[0].IdentificationNo,
-            CusEmail: res.data[0].Email,
-            CusContactNo: res.data[0].ContactNo,
-          };
-
-          this.setState({ jComplain: _modifiedObj });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
-  };
-
-  onUploadUploadAttchmentClick = (e, fileName, filePath, attachmentID) => {
-    try {
-      let Id = 0;
-      this.setState({ UploadAttchment: !this.state.UploadAttchment }, () => {
-        if (this.state.UploadAttchment) {
-          Id = e.row.data.AttachmentID;
-
-          this.setState({
-            FileInfo: e.row.data,
-          });
-        }
-        let attachmentName = fileName + "";
-        let attachmentCount = 0;
-        if (!this.state.ListViewing) {
-          const attachmentLength = this.state.jComplainAttachment.length;
-
-          for (var i = 0; i < attachmentLength; i++) {
-            if (
-              this.state.jComplainAttachment[i].AttachmentID == attachmentID
-            ) {
-              attachmentCount = i;
-            }
-          }
-          debugger;
-          this.state.jComplainAttachment[attachmentCount].AttachmentFilePath =
-            filePath + "";
-          this.state.jComplainAttachment[attachmentCount].AttachmentName =
-            attachmentName;
-          this.setState((prevState) => ({
-            jComplainAttachment: this.state.jComplainAttachment,
-          }));
-        }
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  
 
   render() {
     return (
-      <div>
-        <Card title="Complain/ Inquiry">
-          <Form
-            onContentReady={this.validateForm}
-            ref={this.FormRef}
-            formData={this.state.jComplain}
-          >
-            <GroupItem caption="General Details" colCount={2}>
-              <Item
-                dataField="PriorityLevel"
+      <Aux>
+        <Card title="Complain">
+        <Form ref={this.FormRef} formData={this.state.jComplain}>
+            <GroupItem caption="Complain Information" colCount={2}>
+            <Item
+                dataField="ticketId"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                disabled={true}
+              >
+                <RequiredRule message="Field required" />
+                <Label text="Ticket"></Label>
+              </Item>
+            <Item
+               disabled={this.state.ComplainID!=0}
+                dataField="crimeTypeId"
                 editorType="dxSelectBox"
                 editorOptions={{
-                  items: this.PriorityLevel,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
+                  items: this.state.jCrimeType,
+                  searchEnabled: true,
+                  displayExpr: "name",
+                  valueExpr: "id",
                 }}
-              ></Item>
+                //visible={this.state.jComplain.Status>0}
+                //disabled={this.state.ItemEnable}
+              >
+                <RequiredRule message="Field required" />
+              </Item>
               <Item
-                dataField="ComplainType"
+                dataField="branchId"
+                editorType="dxSelectBox"
+                editorOptions={{
+                  items: this.state.jBranch,
+                  searchEnabled: true,
+                  displayExpr: "name",
+                  valueExpr: "id",
+                }}
+                disabled={this.state.ComplainID!=0}
+              >
+                <RequiredRule message="Field required" />
+              </Item>
+              <Item
+                dataField="institutionId"
+                editorType="dxSelectBox"
+                editorOptions={{
+                  items: this.Institute,
+                  searchEnabled: true,
+                  displayExpr: "Name",
+                  valueExpr: "ID",
+                }}
+                disabled={this.state.ComplainID!=0}
+              >
+                <RequiredRule message="Field required" />
+              </Item>
+              <Item
+                dataField="inquiryEntry"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                disabled={this.state.ComplainID!=0}
+              >
+                <RequiredRule message="Field required" />
+                <Label text="Inquiry"></Label>
+              </Item>
+              <Item
+                dataField="status"
                 editorType="dxSelectBox"
                 editorOptions={{
                   items: this.Status,
+                  searchEnabled: true,
+                  displayExpr: "Name",
                   valueExpr: "ID",
-                  displayExpr: "Name",
-                  onValueChanged: this.onChangeComplainType,
                 }}
-              ></Item>
-              <Item dataField="ComplainNo"></Item>
+                //visible={this.state.ComplainID!=0}
+                disabled={true}
+              >
+                <RequiredRule message="Field required" />
+              </Item>
               <Item
-                dataField="Status"
-                editorType="dxSelectBox"
+                dataField="reviewingResponse"
                 editorOptions={{
-                  items: this.Status01,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
+                  maxLength: 4000,
                 }}
-              ></Item>
-            </GroupItem>
-
-            <GroupItem caption="Customer Details" colCount={2}>
+                visible={false}
+              >
+                <Label text="Reviewing Response"></Label>
+              </Item>
               <Item
-                dataField="CustomerID"
-                editorType="dxSelectBox"
+                dataField="assignResponse"
                 editorOptions={{
-                  items: this.state.jlCustomers,
-                  valueExpr: "CustomerID",
-                  displayExpr: "Name",
-                  onValueChanged: this.onCustomerChanged,
+                  maxLength: 4000,
                 }}
+                visible={false}
               >
-                <Label text="Customer" />
+                <Label text="Assign Response"></Label>
               </Item>
               <Item
-                dataField="RegistrationNumber"
-                editorOptions={{ readOnly: true }}
-              ></Item>
-              <Item
-                dataField="CustomerName"
-                editorOptions={{ readOnly: true }}
-              ></Item>
-              <Item dataField="Address" editorOptions={{ readOnly: true }}>
-                <Label text="Address" />
-              </Item>
-              {/* <Item
-                dataField="CusIdentificationNo"
-                editorOptions={{ readOnly: true }}
-              >
-                <Label text="ID No" />
-              </Item> */}
-              <Item dataField="CusEmail" editorOptions={{ readOnly: true }}>
-                <Label text="Email" />
-              </Item>
-              <Item
-                dataField="TelephoneNumber"
-                editorOptions={{ readOnly: true }}
-              >
-                <Label text="Telephone Number" />
-              </Item>
-              <Item dataField="MobileNumber" editorOptions={{ readOnly: true }}>
-                <Label text="Mobile Number" />
-              </Item>
-            </GroupItem>
-
-            <GroupItem caption="Complain Details" colCount={2}>
-              <Item dataField="ComplainDate" editorType="dxDateBox"></Item>
-              <Item dataField="ResolvingDate" editorType="dxDateBox"></Item>
-              <Item
-                dataField="CategoryID"
-                editorType="dxSelectBox"
+                dataField="investigatingResponse"
                 editorOptions={{
-                  items: this.state.jlCategory,
-                  valueExpr: "CategoryID",
-                  displayExpr: "CategoryName",
-                  onValueChanged: this.onChangeCategory,
+                  maxLength: 4000,
                 }}
+                visible={false}
               >
-                <Label text="Product Type" />
+                <Label text="Investigating Response"></Label>
               </Item>
               <Item
-                dataField="ItemID"
-                editorType="dxSelectBox"
+                dataField="completeResponse"
                 editorOptions={{
-                  items: this.state.jlItem,
-                  valueExpr: "ItemID",
-                  displayExpr: "Name",
+                  maxLength: 4000,
                 }}
+                visible={false}
               >
-                <Label text="Product Name" />
-              </Item>
-              <Item dataField="ProductSize"></Item>
-              <Item dataField="BatchBarSerialCode">
-                <Label text="Batch/Bar/SerialCode" />
+                <Label text="Complete Response"></Label>
               </Item>
               <Item
-                dataField="DefectTypeID"
-                editorType="dxSelectBox"
+                dataField="userComment"
                 editorOptions={{
-                  items: this.state.jlDefectTypes,
-                  valueExpr: "AutoID",
-                  displayExpr: "DefectCode",
+                  maxLength: 4000,
                 }}
+                visible={false}
               >
-                <Label text="Defect/Technical Fault Type" />
+                <Label text="User Comment"></Label>
               </Item>
-              <Item dataField="Quantity" editorType="dxNumberBox"></Item>
-              <Item
-                dataField="ComplainDetails"
-                colSpan={2}
-                editorType="dxTextArea"
-              ></Item>
-            </GroupItem>
-
-            <GroupItem
-              caption="Sales"
-              visible={this.state.jComplain.ComplainType == 3}
-            >
-              <Item
-                dataField="ContactabilityOfSalesRepresentative"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="ContactabilityOfSalesRepresentativeRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
+              <Item 
+               disabled={this.state.ComplainID!=0}
+               >
+              <FileUploader
+              selectButtonText="Select File"
+                  labelText=""
+                  accept="application/x-rpt"
+                  allowedFileExtensions={['.jpg', '.jpeg', '.gif', '.png']}
+                  uploadMode="useForm"
+                  allowCanceling={true}
+                  onValueChanged={this.onValueChanged} />
+                  <img src={this.state.base64Image} alt="" width="200px" height="200px" />
+                  <Label text="User Attachment"></Label>
               </Item>
-
-              <Item
-                dataField="SpeedToRespondToAnInquiryOrder"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="
-                SpeedToRespondToAnInquiryOrderRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="SubmissionOfPriceQuotationInformationOnTime"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="
-                SubmissionOfPriceQuotationInformationOnTimeRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="
-                ResponseToChangesOnOrderPlaced"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="
-                ResponseToChangesOnOrderPlacedRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="FeedbackGivenOnProcessOfTheOrdersPlaced"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="FeedbackGivenOnProcessOfTheOrdersPlacedRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="
-                KnowledgeOfThesalesPersonOnProductsOfferedByTheCompany"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="KnowledgeOfThesalesPersonOnProductsOfferedByTheCompanyRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="
-                AbilityToResolveComplaintsEffectivelyOfRepresentative"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="AbilityToResolveComplaintsEffectivelyOfRepresentativeRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-            </GroupItem>
-
-            <GroupItem
-              caption="Product"
-              visible={this.state.jComplain.ComplainType == 3}
-            >
-              <Item
-                dataField="QualityAndDurabilityOfTheProductSupplied"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="QualityAndDurabilityOfTheProductSuppliedRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="IncidentOfNonConformatiesDefectiveFaced"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="IncidentOfNonConformatiesDefectiveFacedRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="NeatnessOfPackaging"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="NeatnessOfPackagingRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-            </GroupItem>
-
-            <GroupItem
-              caption="Delivery"
-              visible={this.state.jComplain.ComplainType == 3}
-            >
-              <Item
-                dataField="OnTimeDeliveryOfYourOrders"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="OnTimeDeliveryOfYourOrdersRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="TimeTakenForCompletionOfTheTotalOrderQuantity"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="TimeTakenForCompletionOfTheTotalOrderQuantityRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-            </GroupItem>
-
-            <GroupItem
-              caption="Other"
-              visible={this.state.jComplain.ComplainType == 3}
-            >
-              <Item
-                dataField="OverallServiceProvidedByTheCompany"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="OverallServiceProvidedByTheCompanyRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
-              </Item>
-
-              <Item
-                dataField="ResponseForSalesReturns"
-                editorType="dxRadioGroup"
-                editorOptions={{
-                  items: this.AnswerResult,
-                  valueExpr: "ID",
-                  displayExpr: "Name",
-                  layout: "horizontal",
-                }}
-              ></Item>
-              <Item
-                dataField="ResponseForSalesReturnsRemark"
-                editorType="dxTextArea"
-              >
-                <Label text="Remark" />
+              <Item 
+               disabled={true}
+               visible={false}
+               >
+              <FileUploader
+              selectButtonText="Select File"
+                  labelText=""
+                  accept="application/x-rpt"
+                  allowedFileExtensions={['.jpg', '.jpeg', '.gif', '.png']}
+                  uploadMode="useForm"
+                  allowCanceling={true}
+                  onValueChanged={this.onValueChanged} />
+                  <img src={this.state.base64ImageInvestigate} alt="" width="200px" height="200px" />
+                  <Label text="Investigating Attachment"></Label>
               </Item>
             </GroupItem>
           </Form>
-
-          <br />
-          <Form>
-            <GroupItem caption="Attachment" colCount={2}></GroupItem>
-          </Form>
-          <DataGrid
-            id="grid-list"
-            keyExpr="AttachmentID"
-            showBorders={true}
-            wordWrapEnabled={true}
-            allowSearch={true}
-            selection={{ mode: "single" }}
-            hoverStateEnabled={true}
-            dataSource={this.state.jComplainAttachment}
-          >
-            <Editing
-              mode="popup"
-              allowDeleting={true}
-              allowAdding={true}
-              allowUpdating={true}
-              useIcons={true}
-            >
-              <Popup
-                title="Add complain/inquiry attachments"
-                showTitle={true}
-              ></Popup>
-            </Editing>
-            <SearchPanel visible={true} />
-            <GroupPanel visible={true} />
-            <Paging defaultPageSize={6} />
-            <Column dataField="Name" />
-            <Column
-              type="buttons"
-              buttons={[
-                "edit",
-                {
-                  hint: "Upload",
-                  icon: "upload",
-                  visible: true,
-                  onClick: this.onUploadUploadAttchmentClick,
-                },
-                {
-                  hint: "View",
-                  icon: "download",
-                  onClick: this.onAppViewClick,
-                },
-                "delete",
-              ]}
-            />
-          </DataGrid>
-
-          <br></br>
-          <Form>
-            <GroupItem caption="Action Log" colCount={2}></GroupItem>
-          </Form>
-          <DataGrid
-            id="grid-list"
-            keyExpr="AutoID"
-            showBorders={true}
-            wordWrapEnabled={true}
-            allowSearch={true}
-            selection={{ mode: "single" }}
-            hoverStateEnabled={true}
-            dataSource={this.state.jComplainAction}
-          >
-            <Editing
-              mode="popup"
-              allowDeleting={true}
-              allowAdding={true}
-              allowUpdating={true}
-              useIcons={true}
-            >
-              <Popup title="Action Log" showTitle={true}></Popup>
-            </Editing>
-            <SearchPanel visible={true} />
-            <GroupPanel visible={true} />
-            <Paging defaultPageSize={20} />
-            <Column dataField="UserID" caption="User">
-              {" "}
-              <Lookup
-                dataSource={this.state.jlUser}
-                displayExpr="FullName"
-                valueExpr="Id"
-              />
-            </Column>
-            <Column dataField="Description" />
-            <Column dataField="ActionDate" dataType="date" />
-            <Column dataField="Remarks" />
-          </DataGrid>
-
-          <br />
-          <Navbar bg="light" variant="light">
-            <Button
-              variant="dark"
-              icon="feather icon-layers"
-              onClick={this.onSaveClick}
-            >
-              Save
-            </Button>
-            <Button
-              variant="dark"
-              icon="feather icon-layers"
-              onClick={this.onClearClick}
-            >
-              Clear
-            </Button>
-            <Button
-              variant="dark"
-              icon="feather icon-layers"
-              onClick={this.onViewListClick}
-            >
-              View List
-            </Button>
-          </Navbar>
         </Card>
 
-        {/* <LoadPanel
+
+        <Navbar bg="light" variant="light">
+          <Button
+            variant="secondary"
+            onClick={this.SaveData}
+            disabled={this.state.ComplainID!=0}
+          >
+            Save
+          </Button>
+          <Button variant="secondary" onClick={this.OnClearForm}>
+            Clear
+          </Button>
+          <Button variant="secondary" onClick={this.OnListClickEvent}>
+            View List
+          </Button>
+        </Navbar>
+        <LoadPanel
           message="Processing.... Please, wait..."
           shadingColor="rgba(0,0,0,0.4)"
           onHiding={this.onLoadPanelHiding}
@@ -849,46 +439,24 @@ export class ComplainOEnquiry extends Component {
           showPane={true}
           closeOnOutsideClick={false}
           width={500}
-        /> */}
+        />
+
         <List
           Show={this.state.ListViewing}
-          OnHide={this.onViewListClick}
-          ComplainInquiryList={this.state.ComplainInquiryList}
+          OnHide={this.OnListClickEvent}
+          ComplainInquiryList={this.state.jComplainList}
         ></List>
-
-        <UploadAttchment
-          ref={this.ReportRef}
-          Show={this.state.UploadAttchment}
-          OnHide={this.onUploadUploadAttchmentClick}
-          FileInfo={this.state.FileInfo}
-        ></UploadAttchment>
-      </div>
+      </Aux>
     );
   }
 }
 
-export default ComplainOEnquiry;
+const mapStateToProps = (state) => {
+  console.log(state.loggedReducer);
+  return {
+    data: state.loggedReducer,
+  };
+};
 
-/**
- * GET https://localhost:50000/b1s/v1/Activities
- * GET https://localhost:50000/b1s/v1/Activities?$select=ActivityCode,CardCode,Notes&$filter=ActivityCode ge 2 &$orderby=ActivityCode&$top=10&$skip=1
- * 
- * POST https://localhost:50000/b1s/v1/Activities
-{
-    "ActivityDate": "2016-08-30",
-    "ActivityTime": "08:13:00",
-    "CardCode": "C01",
-    "DocEntry": "3",
-    "DocNum": "1",
-    "DocType": "17",
-    "Duration": 15,
-    "DurationType": "du_Minuts",
-    "EndDueDate": "2016-08-30",
-    "EndTime": "08:28:00",
-    "Reminder": "tYES",
-    "ReminderPeriod": 15,
-    "ReminderType": "du_Minuts",
-    "StartDate": "2016-08-30",
-    "StartTime": "08:13:00"
-}
- */
+export default connect(mapStateToProps)(ComplainOEnquiry);
+

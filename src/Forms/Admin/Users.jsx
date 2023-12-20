@@ -5,6 +5,7 @@ import Form, {
   Item,
   GroupItem,
   RequiredRule,
+  EmailRule,
   Label,
   PatternRule,
   EmptyItem,
@@ -25,20 +26,14 @@ export class Users extends Component {
     super(props);
     this.state = {
       UserID: 0,
-      jUser: { Cashier: false, Status: 1 },
+      jUser: { Status: 1 },
       jAuthorization: [],
-      SelectedSchool: [],
-
-      jlSchool: [],
-      jlCachGLAccount: [],
-      jlUserGroup: [],
 
       jUserList: [],
 
       ListViewing: false,
       DataLoading: false,
       PasswordChange: false,
-      IsCashier: false,
       DocReadOnly: false,
     };
 
@@ -54,190 +49,172 @@ export class Users extends Component {
       { ID: 2, Name: "Inactive" },
     ];
 
+    this.Gender = [
+      { ID: "Male", Name: "Male" },
+      { ID: "Female", Name: "Female" },
+    ];
+
     this.onLoadPanelHiding = this.onLoadPanelHiding.bind(this);
     this.FormRef = React.createRef();
   }
 
-  get FormLayout() {
-    return this.FormRef.current.instance;
-  }
 
-  componentDidMount() {
+get FormLayout() {
+return this.FormRef.current.instance;
+}
 
+componentDidMount = (e) => {
 
-  }
+axios
+  .all([
+    // axios.get("/api/Get-Users-Groups"),
+    // axios.get("/api/user-auth-tree"),
+  ])
+  .then
+  // axios.spread((UserGroup, AuthTree) => {
+  //   console.log("UserGroup", UserGroup);
+  //   this.setState(
+  //     {
+  //       jlUserGroup: UserGroup.data,
+  //       jAuthorization: AuthTree.data,
+  //       DocReadOnly: auth,
+  //     },
+  //     () => console.log("DocReadOnly", this.state.jAuthorization)
+  //   );
+  // })
+  ()
+  .catch((error) => console.log(error));
+};
 
-  onLoadPanelHiding = (message, type) => {
-    this.setState({
-      LoadPanelVisible: false,
-    });
+onLoadPanelHiding = (message, type) => {
+this.setState({
+  LoadPanelVisible: false,
+});
 
-    this.OnNotification(message, type);
-  };
+this.OnNotification(message, type);
+};
 
-  OnNotification = (message, type) => {
-    notify({
-      message: message,
-      type: type,
-      displayTime: 3000,
-      position: { at: "top right", offset: "50" },
-    });
-  };
+OnNotification = (message, type) => {
+notify({
+  message: message,
+  type: type,
+  displayTime: 3000,
+  position: { at: "top right", offset: "50" },
+});
+};
 
-  onDefaultSchoolChanged = (e) => {
-    Promise.all([
-      axios.get("/api/account-determination-lookup", {
-        params: { SchoolID: e.value },
-      }),
-    ])
-      .then(([Account]) => {
-        this.setState({
-          jlCachGLAccount: Account.data,
-        });
-      })
-      .catch((error) => console.log(error));
-  };
+OnClickEvent = () => {};
 
-  OnClickEvent = () => { };
+OnSaveValidation = async () => {
+let matchPassword =
+  /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
 
-  OnSaveValidation = async () => {
-    let matchPassword =
-      /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+if (!this.FormLayout.validate().isValid) {
+  this.OnNotification("Fields marked with * are required", "error");
+  return false;
+}
+console.log(this.state.jUser.password);
+//if (this.state.jUser.PasswordChange) {
+if (
+  this.state.jUser.password == "" ||
+  this.state.jUser.password == NaN ||
+  this.state.jUser.password == undefined
+) {
+  this.OnNotification("Password is Required", "error");
+  return false;
+} else if (matchPassword.test(this.state.jUser.password) == false) {
+  this.OnNotification(
+    "Passwords must contain at least 8 characters, including uppercase, lowercase letters and numbers.",
+    "error"
+  );
+  return false;
+} else if (this.state.jUser.password != this.state.jUser.ConfirmPassword) {
+  this.OnNotification(
+    "New password & Confirm password must match",
+    "error"
+  );
+  return false;
+}
+// }
 
-    if (!this.FormLayout.validate().isValid) {
-      this.OnNotification("Fields marked with * are required", "error");
-      return false;
-    }
-    if (this.state.IsCashier) {
-      if (
-        this.state.jUser.CashGLAccount == "" ||
-        this.state.jUser.CashGLAccount == NaN ||
-        this.state.jUser.CashGLAccount == undefined
-      ) {
-        this.OnNotification("Cash in Hand Account is Required", "error");
-        return false;
-      } else if (
-        this.state.jUser.ChequeGLAccount == "" ||
-        this.state.jUser.ChequeGLAccount == NaN ||
-        this.state.jUser.ChequeGLAccount == undefined
-      ) {
-        this.OnNotification("Check in hand Account is Required", "error");
-        return false;
-      } else if (
-        this.state.jUser.BankTransfer == "" ||
-        this.state.jUser.BankTransfer == NaN ||
-        this.state.jUser.BankTransfer == undefined
-      ) {
-        this.OnNotification("Banck Transfer Account is Required", "error");
-        return false;
-      } else if (
-        this.state.jUser.CreditCardGLAccount == "" ||
-        this.state.jUser.CreditCardGLAccount == NaN ||
-        this.state.jUser.CreditCardGLAccount == undefined
-      ) {
-        this.OnNotification("Credit card in hand Account is Required", "error");
-        return false;
-      }
-    }
-    if (this.state.jUser.PasswordChange) {
-      if (
-        this.state.jUser.Password == "" ||
-        this.state.jUser.Password == NaN ||
-        this.state.jUser.Password == undefined
-      ) {
-        this.OnNotification("Password is Required", "error");
-        return false;
-      } else if (matchPassword.test(this.state.jUser.Password) == false) {
-        this.OnNotification(
-          "Passwords must contain at least 8 characters, including uppercase, lowercase letters and numbers.",
-          "error"
-        );
-        return false;
-      } else if (
-        this.state.jUser.Password != this.state.jUser.ConfirmPassword
-      ) {
-        this.OnNotification(
-          "New password & Confirm password must match",
-          "error"
-        );
-        return false;
-      }
-    }
+return true;
+};
 
-    return true;
-  };
-
-  SaveData = async (e) => {
-    if (await this.OnSaveValidation()) {
-      Swal.fire({
-        type: "info",
-        showCancelButton: true,
-        text: "Do you want to save ?",
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      }).then((res) => {
-        if (res.value) {
-          this.setState({ LoadPanelVisible: true });
-          this.state.SelectedSchool = [];
-          this.state.jUser.Schools.forEach((element) => {
-            this.state.SelectedSchool.push({
-              Id: element,
-            });
-          });
-          this.serverRequest = axios
-            .post("/api/user", {
-              UserID: this.state.UserID,
-              User: JSON.stringify(this.state.jUser),
-              School: JSON.stringify(this.state.SelectedSchool),
-              Authorization: JSON.stringify(this.state.jAuthorization),
-              AdminUserID:
-                this.props.data.user == undefined
-                  ? this.props.data.data.user.Id
-                  : this.props.data.user.Id,
-            })
-            .then((response) => {
-              this.onLoadPanelHiding("Successfully Saved", "success");
-              this.OnClearForm();
-              //this.setState({CourseID: response.data[0].CourseID});
-            })
-            .catch((error) => {
-              this.onLoadPanelHiding("Something went wrong", "error");
-              console.log(error);
-            });
-        } else if (res.dismiss == "cancel") {
-          //console.log("cancel");
-        } else if (res.dismiss == "esc") {
-          //console.log("cancle");
-        }
+SaveData = async (e) => {
+if (await this.OnSaveValidation()) {
+  Swal.fire({
+    type: "info",
+    showCancelButton: true,
+    text: "Do you want to save ?",
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+  }).then((res) => {
+    if (res.value) {
+      this.setState({ LoadPanelVisible: true });
+      console.log( {
+        firstName: this.state.jUser.firstName,
+        lastName: this.state.jUser.lastName,
+        email: this.state.jUser.email,
+        nic: this.state.jUser.nic,
+        address: this.state.jUser.address,
+        mobileNo: this.state.jUser.mobileNo,
+        dob: this.state.jUser.dob,
+        gender: this.state.jUser.gender,
+        status: this.state.jUser.status,
+        type: 1,
+        roleId: 2,
       });
+      this.serverRequest = axios
+        .post("http://20.201.121.161:4478/api/User/Register", {
+          firstName: this.state.jUser.firstName,
+          lastName: this.state.jUser.lastName,
+          email: this.state.jUser.email,
+          nic: this.state.jUser.nic,
+          address: this.state.jUser.address,
+          mobileNo: JSON.stringify( this.state.jUser.mobileNo),
+          dob: this.state.jUser.dob,
+          gender: this.state.jUser.gender,
+          status: this.state.jUser.status,
+          type: 1,
+          roleId: 2,
+        })
+        .then((response) => {
+          this.onLoadPanelHiding(response.data, "success");
+          this.OnClearForm();
+          //this.setState({CourseID: response.data[0].CourseID});
+        })
+        .catch((error) => {
+          this.onLoadPanelHiding("Something went wrong", "error");
+          console.log(error);
+        });
+    } else if (res.dismiss == "cancel") {
+      //console.log("cancel");
+    } else if (res.dismiss == "esc") {
+      //console.log("cancle");
     }
-  };
+  });
+}
+};
 
-  OnClearForm = () => {
-    let auth = this.state.jAuthorization;
+OnClearForm = () => {
 
-    auth = auth.map((el) => (el.Auth !== 2 ? { ...el, Auth: 2 } : el));
 
-    this.setState({
-      UserID: 0,
-      jUser: { Cashier: false, Status: 1 },
-      jAuthorization: auth,
-      SelectedSchool: [],
+this.setState({
+  UserID: 0,
+  jUser: { Status: 1 },
+  jAuthorization: [],
 
-      //jlSchool: [],
-      jlCachGLAccount: [],
-      //jlUserGroup: [],
+  jUserList: [],
 
-      jUserList: [],
-
-      ListViewing: false,
-      PasswordChange: false,
-      IsCashier: false,
-    });
-  };
-
+  ListViewing: false,
+  DataLoading: false,
+  PasswordChange: false,
+  IsCashier: false,
+  DocReadOnly: false,
+});
+};
   onValueChanged = (e) => {
     this.state.SelectedSchool = [];
     const newValues = e.value;
@@ -324,20 +301,7 @@ export class Users extends Component {
       .catch((error) => console.log(error));
   }
 
-  onChangeCashire = (e) => {
-    if (!this.state.DataLoading) {
-      this.setState((prevState) => ({
-        jUser: {
-          ...prevState.jUser,
-          CashGLAccount: "",
-          ChequeGLAccount: "",
-          BankTransfer: "",
-          CreditCardGLAccount: "",
-        },
-        IsCashier: e.value,
-      }));
-    }
-  };
+  
 
   onChangePassword = (e) => {
     if (e.value && !this.state.DataLoading) {
@@ -352,79 +316,25 @@ export class Users extends Component {
     }
   };
 
-  onRowUpdating = (e) => {
-    if (e.newData.Auth === 9) {
-      e.cancel = true;
-    }
-  };
-
-  onRowUpdated = (e) => {
-    let auth = this.state.jAuthorization;
-
-    if (e.data.Type === 1) {
-      auth = auth.map((el) =>
-        el.RootParent === e.data.MenuID || el.ParentID === e.data.MenuID
-          ? { ...el, Auth: e.data.Auth }
-          : el
-      );
-    } else {
-      let allParentCount = auth.filter(
-        (item) => item.ParentID === e.data.ParentID
-      );
-      let typeParentCount = auth.filter(
-        (item) => item.ParentID === e.data.ParentID && item.Auth === e.data.Auth
-      );
-
-      if (allParentCount.length === typeParentCount.length)
-        auth = auth.map((el) =>
-          el.MenuID === e.data.ParentID ? { ...el, Auth: e.data.Auth } : el
-        );
-      else
-        auth = auth.map((el) =>
-          el.MenuID === e.data.ParentID ? { ...el, Auth: 9 } : el
-        );
-
-      /////////////////////////
-
-      let allRootCount = auth.filter(
-        (item) => item.RootParent === e.data.RootParent
-      );
-      let typeRootCount = auth.filter(
-        (item) =>
-          item.RootParent === e.data.RootParent && item.Auth === e.data.Auth
-      );
-
-      if (allRootCount.length === typeRootCount.length)
-        auth = auth.map((el) =>
-          el.MenuID === e.data.RootParent ? { ...el, Auth: e.data.Auth } : el
-        );
-      else
-        auth = auth.map((el) =>
-          el.MenuID === e.data.RootParent ? { ...el, Auth: 9 } : el
-        );
-    }
-
-    this.setState({ jAuthorization: auth });
-  };
 
   render() {
     return (
       <Aux>
         <Card title="User">
-          <Form ref={this.FormRef} formData={this.state.jUser}>
+        <Form ref={this.FormRef} formData={this.state.jUser}>
             <GroupItem caption="User Information" colCount={2}>
               <Item
-                dataField="UserName"
+                dataField="firstName"
                 editorOptions={{
                   maxLength: 50,
                   readOnly: this.state.UserID != 0,
                 }}
               >
                 <RequiredRule message="Field required" />
-                <Label text="User Name"></Label>
+                <Label text="First Name"></Label>
               </Item>
               <Item
-                dataField="FullName"
+                dataField="lastName"
                 editorOptions={{
                   maxLength: 50,
                 }}
@@ -432,49 +342,58 @@ export class Users extends Component {
                 <RequiredRule message="Field required" />
               </Item>
               <Item
-                dataField="Designation"
+                dataField="email"
                 editorOptions={{
                   maxLength: 50,
                 }}
-              ></Item>
+              >
+                <RequiredRule message="Field required" />
+                <EmailRule message="Email is invalid" />
+              </Item>
               <Item
-                dataField="EmployeeNo"
+                dataField="nic"
                 editorOptions={{
-                  maxLength: 50,
+                  maxLength: 12,
+                  minLength: 10,
                 }}
-              ></Item>
+              >
+                <RequiredRule message="Field required" />
+              </Item>
               <Item
-                dataField="ContactNo"
-                editorOptions={{
-                  maxLength: 50,
-                }}
-              ></Item>
-              <Item
-                dataField="Email"
-                editorOptions={{
-                  maxLength: 50,
-                }}
-              ></Item>
-              <Item
-                dataField="Address"
+                dataField="address"
                 editorOptions={{
                   maxLength: 100,
                 }}
-              ></Item>
-
-              <Item dataField="Remark"></Item>
+              >
+                <RequiredRule message="Field required" />
+              </Item>
               <Item
-                dataField="GroupID"
-                editorType="dxSelectBox"
+                dataField="mobileNo"
+                editorType="dxNumberBox"
                 editorOptions={{
-                  items: this.state.jlUserGroup,
-                  valueExpr: "AutoID",
-                  displayExpr: "GroupName",
-                  onValueChanged: this.onModuleValueChanged,
+                  maxLength: 12,
                 }}
               >
-                <Label text="User Group" />
+                <RequiredRule message="Field required" />
               </Item>
+              <Item dataField="dob" editorType="dxDateBox">
+                <Label text="Birthday" />
+
+                <RequiredRule message="Field required" />
+              </Item>
+              <Item
+                dataField="gender"
+                editorType="dxSelectBox"
+                editorOptions={{
+                  items: this.Gender,
+                  searchEnabled: true,
+                  displayExpr: "Name",
+                  valueExpr: "ID",
+                }}
+              >
+                <RequiredRule message="Field required" />
+              </Item>
+
               <Item
                 dataField="Status"
                 editorType="dxSelectBox"
@@ -487,72 +406,28 @@ export class Users extends Component {
               >
                 <RequiredRule message="Field required" />
               </Item>
-            </GroupItem>
-
-            <GroupItem caption="Password" colCount={2}>
               <Item
-                dataField="PasswordChange"
-                editorType="dxCheckBox"
-                editorOptions={{
-                  onValueChanged: this.onChangePassword,
-                }}
-              ></Item>
-              <EmptyItem></EmptyItem>
-              <Item
-                dataField="Password"
+                dataField="password"
                 displayFormat="#"
                 editorOptions={{
                   mode: "password",
-                  readOnly: !this.state.PasswordChange,
+                  //readOnly: !this.state.PasswordChange,
                 }}
               >
+                <RequiredRule message="Field required" />
                 <Label text="New Password" />
               </Item>
               <Item
                 dataField="ConfirmPassword"
                 editorOptions={{
                   mode: "password",
-                  readOnly: !this.state.PasswordChange,
+                  //readOnly: !this.state.PasswordChange,
                 }}
               ></Item>
             </GroupItem>
-
-
-
           </Form>
         </Card>
 
-        <Card title="Authorization">
-          <TreeList
-            id="user-authorization"
-            dataSource={this.state.jAuthorization}
-            columnAutoWidth={true}
-            wordWrapEnabled={true}
-            showBorders={true}
-            keyExpr="MenuID"
-            parentIdExpr="ParentID"
-            onRowUpdated={this.onRowUpdated}
-            onRowUpdating={this.onRowUpdating}
-          >
-            <Editing allowUpdating={true} mode="cell" />
-            <Column
-              minWidth={250}
-              dataField="Name"
-              caption="Module"
-              allowEditing={false}
-            >
-              <RequiredRule />
-            </Column>
-            <Column minWidth={120} dataField="Auth" caption="Authorization">
-              <Lookup
-                dataSource={this.Auth}
-                valueExpr="ID"
-                displayExpr="Name"
-              />
-              <RequiredRule />
-            </Column>
-          </TreeList>
-        </Card>
 
         <Navbar bg="light" variant="light">
           <Button

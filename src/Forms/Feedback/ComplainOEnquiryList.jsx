@@ -6,6 +6,7 @@ import DataGrid, {
   SearchPanel,
   GroupPanel,
   Paging,
+  Lookup,
 } from "devextreme-react/data-grid";
 
 export class ComplainOEnquiryList extends Component {
@@ -16,6 +17,18 @@ export class ComplainOEnquiryList extends Component {
       viewListSelectedID: 0,
       ComplainInquiryList: [],
     };
+
+    this.Status = [
+      { ID: 0, Name: "Reviewing" },
+      { ID: 1, Name: "Assign To Officer" },
+      { ID: 2, Name: "Investigating" },
+      { ID: 3, Name: "Complete" },
+      { ID: 4, Name: "Closed" },
+    ];
+    this.Institute = [
+      { ID: 0, Name: "Wildlife conservations" },
+      { ID: 1, Name: "Forest conservations" },
+  ];
   }
 
   componentDidMount() { 
@@ -23,7 +36,7 @@ export class ComplainOEnquiryList extends Component {
   }
 
   onSelectionChanged = (e) => {
-    this.setState({ viewListSelectedID: e.selectedRowsData[0].AutoID });
+    this.setState({ viewListSelectedID: e.selectedRowsData[0].id });
   };
 
   onSelectClick = (e) => {
@@ -51,7 +64,7 @@ export class ComplainOEnquiryList extends Component {
             <DataGrid
               id="grid-list"
               dataSource={this.props.ComplainInquiryList}
-              keyExpr="AutoID"
+              keyExpr="id"
               showBorders={true}
               wordWrapEnabled={true}
               allowSearch={true}
@@ -62,11 +75,23 @@ export class ComplainOEnquiryList extends Component {
               <SearchPanel visible={true} />
               <GroupPanel visible={true} />
               <Paging defaultPageSize={12} />
-              <Column dataField="AutoID" visible={false} />
-              <Column dataField="ComplainNo" />
-              <Column dataField="PriorityLevel" />
-              <Column dataField="ComplainType" />
-              <Column dataField="ComplainStatus" />
+              <Column dataField="id" visible={false} />
+              <Column dataField="crimeTypeName" />
+              <Column dataField="inquiryEntry" />
+              <Column dataField="institutionId">
+                            <Lookup
+                                dataSource={this.Institute}
+                                valueExpr="ID"
+                                displayExpr="Name"
+                            />
+                        </Column>
+                        <Column dataField="status">
+                            <Lookup
+                                dataSource={this.Status}
+                                valueExpr="ID"
+                                displayExpr="Name"
+                            />
+                        </Column>
             </DataGrid>
 
             <br></br>

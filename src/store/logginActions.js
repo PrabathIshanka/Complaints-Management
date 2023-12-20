@@ -19,7 +19,7 @@ export const getData = () => {
 
 const IsLoggedSuccess = (
   userData,
-  schools,
+  //  schools,
   authorization,
   approvalDocument
 ) => {
@@ -27,7 +27,7 @@ const IsLoggedSuccess = (
     type: actionTypes.SET_USER,
     payLoad: userData,
     message: "Loggin Success",
-    School: schools,
+    // School: schools,
     Authorization: authorization,
     ApprovalDocument: approvalDocument,
   };
@@ -38,7 +38,7 @@ export const IsRoundData = (userData, schools, authorization) => {
     type: actionTypes.SET_USER,
     payLoad: userData,
     message: "Loggin Success",
-    School: schools,
+    //   School: schools,
     Authorization: authorization,
   };
 };
@@ -53,7 +53,7 @@ const IsLogginError = (error) => {
 
 export const loggout = () => {
   localStorage.setItem("user", null);
-  localStorage.setItem("School", null);
+  //localStorage.setItem("School", null);
   localStorage.setItem("Authorization", null);
   localStorage.setItem("ApprovalDocument", null);
   return (dispatch) => {
@@ -70,218 +70,68 @@ const OnNotification = (message, type) => {
   });
 };
 
-export const fetchLoginData = (email, password) => {
+export const fetchLoginData = (UserID, CurrentPassword) => {
   return (dispatch) => {
-    const UserObject = {
-      Id: 6089,
-      UserName: "Admas",
-      FullName: "Admas",
-      Status: 1,
-      GroupID: 3,
-    };
-    const Auth = [
-      { MenuID: 1000, Auth: 0 },
-      { MenuID: 1001, Auth: 0 },
-      { MenuID: 1002, Auth: 0 },
-      { MenuID: 1003, Auth: 0 },
-      { MenuID: 1004, Auth: 0 },
-      { MenuID: 1500, Auth: 0 },
-      { MenuID: 9010, Auth: 0 },
-      { MenuID: 9011, Auth: 0 },
-      { MenuID: 9012, Auth: 0 },
-      { MenuID: 9013, Auth: 0 },
-      { MenuID: 9014, Auth: 0 },
-      { MenuID: 9004, Auth: 0 },
-      { MenuID: 9005, Auth: 0 },
-      { MenuID: 9006, Auth: 0 },
-      { MenuID: 9007, Auth: 0 },
-      { MenuID: 9008, Auth: 0 },
-      { MenuID: 9009, Auth: 0 },
-      { MenuID: 7502, Auth: 0 },
-      { MenuID: 7503, Auth: 0 },
-      { MenuID: 9000, Auth: 0 },
-      { MenuID: 9001, Auth: 0 },
-      { MenuID: 9002, Auth: 0 },
-      { MenuID: 9003, Auth: 0 },
-      { MenuID: 7001, Auth: 0 },
-      { MenuID: 7002, Auth: 0 },
-      { MenuID: 7003, Auth: 0 },
-      { MenuID: 7004, Auth: 0 },
-      { MenuID: 7500, Auth: 0 },
-      { MenuID: 7501, Auth: 0 },
-      { MenuID: 6002, Auth: 0 },
-      { MenuID: 6003, Auth: 0 },
-      { MenuID: 6004, Auth: 0 },
-      { MenuID: 6500, Auth: 0 },
-      { MenuID: 6501, Auth: 0 },
-      { MenuID: 7000, Auth: 0 },
-      { MenuID: 5001, Auth: 0 },
-      { MenuID: 5002, Auth: 0 },
-      { MenuID: 5003, Auth: 0 },
-      { MenuID: 5004, Auth: 0 },
-      { MenuID: 6000, Auth: 0 },
-      { MenuID: 6001, Auth: 0 },
-      { MenuID: 4011, Auth: 0 },
-      { MenuID: 4012, Auth: 0 },
-      { MenuID: 4013, Auth: 0 },
-      { MenuID: 4014, Auth: 0 },
-      { MenuID: 4015, Auth: 0 },
-      { MenuID: 5000, Auth: 0 },
-      { MenuID: 4005, Auth: 0 },
-      { MenuID: 4006, Auth: 0 },
-      { MenuID: 4007, Auth: 0 },
-      { MenuID: 4008, Auth: 0 },
-      { MenuID: 4009, Auth: 0 },
-      { MenuID: 4010, Auth: 0 },
-      { MenuID: 3012, Auth: 0 },
-      { MenuID: 4000, Auth: 0 },
-      { MenuID: 4001, Auth: 0 },
-      { MenuID: 4002, Auth: 0 },
-      { MenuID: 4003, Auth: 0 },
-      { MenuID: 4004, Auth: 0 },
-      { MenuID: 3006, Auth: 0 },
-      { MenuID: 3007, Auth: 0 },
-      { MenuID: 3008, Auth: 0 },
-      { MenuID: 3009, Auth: 0 },
-      { MenuID: 3010, Auth: 0 },
-      { MenuID: 3011, Auth: 0 },
-      { MenuID: 3000, Auth: 0 },
-      { MenuID: 3001, Auth: 0 },
-      { MenuID: 3002, Auth: 0 },
-      { MenuID: 3003, Auth: 0 },
-      { MenuID: 3004, Auth: 0 },
-      { MenuID: 3005, Auth: 0 },
-      { MenuID: 2004, Auth: 0 },
-      { MenuID: 2005, Auth: 0 },
-      { MenuID: 2006, Auth: 0 },
-      { MenuID: 2007, Auth: 0 },
-      { MenuID: 2008, Auth: 0 },
-      { MenuID: 2009, Auth: 0 },
-      { MenuID: 1907, Auth: 0 },
-      { MenuID: 1908, Auth: 0 },
-      { MenuID: 2000, Auth: 0 },
-      { MenuID: 2001, Auth: 0 },
-      { MenuID: 2002, Auth: 0 },
-      { MenuID: 2003, Auth: 0 },
-      { MenuID: 1901, Auth: 0 },
-      { MenuID: 1902, Auth: 0 },
-      { MenuID: 1903, Auth: 0 },
-      { MenuID: 1904, Auth: 0 },
-      { MenuID: 1905, Auth: 0 },
-      { MenuID: 1906, Auth: 0 },
-      { MenuID: 1800, Auth: 0 },
-      { MenuID: 1801, Auth: 0 },
-      { MenuID: 1850, Auth: 0 },
-      { MenuID: 1851, Auth: 0 },
-      { MenuID: 1852, Auth: 0 },
-      { MenuID: 1900, Auth: 0 },
-      { MenuID: 1651, Auth: 0 },
-      { MenuID: 1652, Auth: 0 },
-      { MenuID: 1700, Auth: 0 },
-      { MenuID: 1701, Auth: 0 },
-      { MenuID: 1750, Auth: 0 },
-      { MenuID: 1751, Auth: 0 },
-      { MenuID: 1507, Auth: 0 },
-      { MenuID: 1550, Auth: 0 },
-      { MenuID: 1551, Auth: 0 },
-      { MenuID: 1600, Auth: 0 },
-      { MenuID: 1601, Auth: 0 },
-      { MenuID: 1650, Auth: 0 },
-      { MenuID: 1501, Auth: 0 },
-      { MenuID: 1502, Auth: 0 },
-      { MenuID: 1503, Auth: 0 },
-      { MenuID: 1504, Auth: 0 },
-      { MenuID: 1505, Auth: 0 },
-      { MenuID: 1506, Auth: 0 },
-      { MenuID: 1018, Auth: 0 },
-      { MenuID: 1012, Auth: 0 },
-      { MenuID: 1015, Auth: 0 },
-      { MenuID: 1016, Auth: 0 },
-      { MenuID: 1010, Auth: 0 },
-      { MenuID: 1019, Auth: 0 },
-      { MenuID: 1013, Auth: 0 },
-      { MenuID: 1007, Auth: 0 },
-      { MenuID: 1014, Auth: 0 },
-      { MenuID: 1008, Auth: 0 },
-      { MenuID: 9999, Auth: 0 },
-      { MenuID: 1011, Auth: 0 },
-      { MenuID: 1005, Auth: 0 },
-      { MenuID: 9015, Auth: 0 },
-      { MenuID: 1006, Auth: 0 },
-      { MenuID: 1017, Auth: 0 },
-      { MenuID: 1009, Auth: 0 },
-    ];
-    const appro = [];
+    console.log({ username: UserID, password: CurrentPassword });
+    if (UserID != undefined && CurrentPassword != undefined) {
+      dispatch(IsLogginReuqest);
+      axios
+        .post("http://20.201.121.161:4478/api/Auth", {
+          username: UserID,
+          password: CurrentPassword,
+        }) //authontication-login?email=${email}&passowrd=${password}
+        .then((respones) => {
+          console.log(respones.data.token);
+          localStorage.setItem("token", (respones.data.token));
+          const user = JSON.parse(respones.data.role.id);
+          //  const UserWiseSchool = "";
+          const UserWiseAuthorization = {}; // JSON.parse(respones.data);
+          const ApprovalDocument = {}; /*JSON.parse(
+            {}
+            // respones.data[0].ApprovalDocument
+          );*/
+          console.log(user);
 
-    dispatch(IsLogginReuqest);
-    const user = UserObject; // JSON.parse(UserObject);
-    const UserWiseSchool = "";
-    const UserWiseAuthorization = Auth //(
-      //JSON.parse(
-    //   Auth
-    // );
-    const ApprovalDocument = appro; //JSON.parse(appro);
-    if (true) {
-      //user.statue != "fasle"
-      dispatch(
-        IsLoggedSuccess(
-          user,
-          UserWiseSchool,
-          UserWiseAuthorization,
-          ApprovalDocument
-        )
-      );
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("School", JSON.stringify(UserWiseSchool));
-      localStorage.setItem(
-        "Authorization",
-        JSON.stringify(UserWiseAuthorization)
-      );
-      localStorage.setItem(
-        "ApprovalDocument",
-        JSON.stringify(ApprovalDocument)
-      );
+          if (
+            user != 0 /*Object.keys(user).length !== 0 && user.Status == 1*/
+          ) {
+            console.log("HIIIII");
+            dispatch(
+              IsLoggedSuccess(
+                user,
+                //    UserWiseSchool,
+                UserWiseAuthorization,
+                ApprovalDocument
+              )
+            );
+            console.log(
+              "UserWiseAuthorization",
+              JSON.stringify(UserWiseAuthorization)
+            );
+            localStorage.setItem("user", JSON.stringify(user));
+            // localStorage.setItem("School", JSON.stringify(UserWiseSchool));
+            localStorage.setItem(
+              "Authorization",
+              JSON.stringify(UserWiseAuthorization)
+            );
+            localStorage.setItem(
+              "ApprovalDocument",
+              JSON.stringify(ApprovalDocument)
+            );
+          } else {
+            OnNotification("Invalid User Name or Passrwod", "error");
+            dispatch(IsLogginError("Error Loggin Attempt"));
+          }
+        })
+        .catch((error) => {
+          OnNotification("Invalid UserName Or Passwrod", "error");
+          const errorMsg = error.message;
+          dispatch(IsLogginError(errorMsg));
+        });
+    } else {
+      OnNotification("Invalid UserName Or Passwrod", "error");
+      const errorMsg = "Invalid UserName Or Passwrod";
+      dispatch(IsLogginError(errorMsg));
     }
-    // axios
-    //   .get(`/api/authontication-login?email=${email}&passowrd=${password}`)
-    //   .then((respones) => {
-    //     const user = JSON.parse(respones.data[0].Users);
-    //     const UserWiseSchool = "";
-    //     const UserWiseAuthorization = JSON.parse(
-    //       respones.data[0].UserWiseAuthorization
-    //     );
-    //     const ApprovalDocument = JSON.parse(respones.data[0].ApprovalDocument);
-
-    //     console.log("user", user);
-
-    //     if (true) {//user.statue != "fasle"
-    //       dispatch(
-    //         IsLoggedSuccess(
-    //           user,
-    //           UserWiseSchool,
-    //           UserWiseAuthorization,
-    //           ApprovalDocument
-    //         )
-    //       );
-    //       localStorage.setItem("user", JSON.stringify(user));
-    //       localStorage.setItem("School", JSON.stringify(UserWiseSchool));
-    //       localStorage.setItem(
-    //         "Authorization",
-    //         JSON.stringify(UserWiseAuthorization)
-    //       );
-    //       localStorage.setItem(
-    //         "ApprovalDocument",
-    //         JSON.stringify(ApprovalDocument)
-    //       );
-    //     } else {
-    //       OnNotification("Invalid User Name or Passwod", "error");
-    //       dispatch(IsLogginError("Error Loggin Attempt"));
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     OnNotification("Invalid UserName Or Passwod", "error");
-    //     const errorMsg = error.message;
-    //     dispatch(IsLogginError(errorMsg));
-    //   });
   };
 };
