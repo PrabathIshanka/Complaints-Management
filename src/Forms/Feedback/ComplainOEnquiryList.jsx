@@ -28,10 +28,10 @@ export class ComplainOEnquiryList extends Component {
     this.Institute = [
       { ID: 0, Name: "Wildlife conservations" },
       { ID: 1, Name: "Forest conservations" },
-  ];
+    ];
   }
 
-  componentDidMount() { 
+  componentDidMount() {
     console.log();
   }
 
@@ -76,22 +76,24 @@ export class ComplainOEnquiryList extends Component {
               <GroupPanel visible={true} />
               <Paging defaultPageSize={12} />
               <Column dataField="id" visible={false} />
-              <Column dataField="crimeTypeName" />
-              <Column dataField="inquiryEntry" />
               <Column dataField="institutionId">
-                            <Lookup
-                                dataSource={this.Institute}
-                                valueExpr="ID"
-                                displayExpr="Name"
-                            />
-                        </Column>
-                        <Column dataField="status">
-                            <Lookup
-                                dataSource={this.Status}
-                                valueExpr="ID"
-                                displayExpr="Name"
-                            />
-                        </Column>
+                <Lookup
+                  dataSource={this.Institute}
+                  valueExpr="ID"
+                  displayExpr="Name"
+                />
+              </Column>
+              <Column dataField="branchName" />
+              <Column dataField="crimeTypeName" />
+              <Column dataField="ticketId" />
+              <Column dataField="inquiryEntry" />
+              <Column dataField="status">
+                <Lookup
+                  dataSource={this.Status}
+                  valueExpr="ID"
+                  displayExpr="Name"
+                />
+              </Column>
             </DataGrid>
 
             <br></br>
@@ -107,12 +109,11 @@ export class ComplainOEnquiryList extends Component {
             >
               Close
             </Button>
-            
           </Modal.Body>
         </Modal>
       </Fragment>
-    )
+    );
   }
 }
 
-export default ComplainOEnquiryList
+export default ComplainOEnquiryList;

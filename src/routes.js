@@ -13,11 +13,14 @@ const Notification = React.lazy(() => import("./Forms/Dashboard/Notification"));
 const ComplainOEnquiry = React.lazy(() =>
   import("./Forms/Feedback/ComplainOEnquiry")
 );
-const AssignOfficer = React.lazy(() => import("./Forms/Feedback/AssignOfficer"));
+const AssignOfficer = React.lazy(() =>
+  import("./Forms/Feedback/AssignOfficer")
+);
 const Investigate = React.lazy(() => import("./Forms/Feedback/Investigate"));
 const CompleteInquiry = React.lazy(() => import("./Forms/Feedback/Complete"));
-const FeedbackInquiry = React.lazy(() => import("./Forms/Feedback/FeedbackInquiry"));
-
+const FeedbackInquiry = React.lazy(() =>
+  import("./Forms/Feedback/FeedbackInquiry")
+);
 
 const Report = React.lazy(() => import("./Forms/Report/Report"));
 const Users = React.lazy(() => import("./Forms/Admin/Users"));

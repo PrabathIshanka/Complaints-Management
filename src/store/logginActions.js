@@ -82,8 +82,10 @@ export const fetchLoginData = (UserID, CurrentPassword) => {
         }) //authontication-login?email=${email}&passowrd=${password}
         .then((respones) => {
           console.log(respones.data.token);
-          localStorage.setItem("token", (respones.data.token));
-          const user = JSON.parse(respones.data.role.id);
+          localStorage.setItem("token", respones.data.token);
+          localStorage.setItem("role", respones.data.role.id);
+          const user = JSON.parse(respones.data.userId);
+          const role = JSON.parse(respones.data.role.id);
           //  const UserWiseSchool = "";
           const UserWiseAuthorization = {}; // JSON.parse(respones.data);
           const ApprovalDocument = {}; /*JSON.parse(

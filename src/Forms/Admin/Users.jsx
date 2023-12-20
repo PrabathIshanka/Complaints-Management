@@ -58,163 +58,159 @@ export class Users extends Component {
     this.FormRef = React.createRef();
   }
 
+  get FormLayout() {
+    return this.FormRef.current.instance;
+  }
 
-get FormLayout() {
-return this.FormRef.current.instance;
-}
+  componentDidMount = (e) => {
+    axios
+      .all([
+        // axios.get("/api/Get-Users-Groups"),
+        // axios.get("/api/user-auth-tree"),
+      ])
+      .then
+      // axios.spread((UserGroup, AuthTree) => {
+      //   console.log("UserGroup", UserGroup);
+      //   this.setState(
+      //     {
+      //       jlUserGroup: UserGroup.data,
+      //       jAuthorization: AuthTree.data,
+      //       DocReadOnly: auth,
+      //     },
+      //     () => console.log("DocReadOnly", this.state.jAuthorization)
+      //   );
+      // })
+      ()
+      .catch((error) => console.log(error));
+  };
 
-componentDidMount = (e) => {
+  onLoadPanelHiding = (message, type) => {
+    this.setState({
+      LoadPanelVisible: false,
+    });
 
-axios
-  .all([
-    // axios.get("/api/Get-Users-Groups"),
-    // axios.get("/api/user-auth-tree"),
-  ])
-  .then
-  // axios.spread((UserGroup, AuthTree) => {
-  //   console.log("UserGroup", UserGroup);
-  //   this.setState(
-  //     {
-  //       jlUserGroup: UserGroup.data,
-  //       jAuthorization: AuthTree.data,
-  //       DocReadOnly: auth,
-  //     },
-  //     () => console.log("DocReadOnly", this.state.jAuthorization)
-  //   );
-  // })
-  ()
-  .catch((error) => console.log(error));
-};
+    this.OnNotification(message, type);
+  };
 
-onLoadPanelHiding = (message, type) => {
-this.setState({
-  LoadPanelVisible: false,
-});
+  OnNotification = (message, type) => {
+    notify({
+      message: message,
+      type: type,
+      displayTime: 3000,
+      position: { at: "top right", offset: "50" },
+    });
+  };
 
-this.OnNotification(message, type);
-};
+  OnClickEvent = () => {};
 
-OnNotification = (message, type) => {
-notify({
-  message: message,
-  type: type,
-  displayTime: 3000,
-  position: { at: "top right", offset: "50" },
-});
-};
+  OnSaveValidation = async () => {
+    let matchPassword =
+      /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
 
-OnClickEvent = () => {};
-
-OnSaveValidation = async () => {
-let matchPassword =
-  /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
-
-if (!this.FormLayout.validate().isValid) {
-  this.OnNotification("Fields marked with * are required", "error");
-  return false;
-}
-console.log(this.state.jUser.password);
-//if (this.state.jUser.PasswordChange) {
-if (
-  this.state.jUser.password == "" ||
-  this.state.jUser.password == NaN ||
-  this.state.jUser.password == undefined
-) {
-  this.OnNotification("Password is Required", "error");
-  return false;
-} else if (matchPassword.test(this.state.jUser.password) == false) {
-  this.OnNotification(
-    "Passwords must contain at least 8 characters, including uppercase, lowercase letters and numbers.",
-    "error"
-  );
-  return false;
-} else if (this.state.jUser.password != this.state.jUser.ConfirmPassword) {
-  this.OnNotification(
-    "New password & Confirm password must match",
-    "error"
-  );
-  return false;
-}
-// }
-
-return true;
-};
-
-SaveData = async (e) => {
-if (await this.OnSaveValidation()) {
-  Swal.fire({
-    type: "info",
-    showCancelButton: true,
-    text: "Do you want to save ?",
-    confirmButtonText: "Yes",
-    cancelButtonText: "No",
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-  }).then((res) => {
-    if (res.value) {
-      this.setState({ LoadPanelVisible: true });
-      console.log( {
-        firstName: this.state.jUser.firstName,
-        lastName: this.state.jUser.lastName,
-        email: this.state.jUser.email,
-        nic: this.state.jUser.nic,
-        address: this.state.jUser.address,
-        mobileNo: this.state.jUser.mobileNo,
-        dob: this.state.jUser.dob,
-        gender: this.state.jUser.gender,
-        status: this.state.jUser.status,
-        type: 1,
-        roleId: 2,
-      });
-      this.serverRequest = axios
-        .post("http://20.201.121.161:4478/api/User/Register", {
-          firstName: this.state.jUser.firstName,
-          lastName: this.state.jUser.lastName,
-          email: this.state.jUser.email,
-          nic: this.state.jUser.nic,
-          address: this.state.jUser.address,
-          mobileNo: JSON.stringify( this.state.jUser.mobileNo),
-          dob: this.state.jUser.dob,
-          gender: this.state.jUser.gender,
-          status: this.state.jUser.status,
-          type: 1,
-          roleId: 2,
-        })
-        .then((response) => {
-          this.onLoadPanelHiding(response.data, "success");
-          this.OnClearForm();
-          //this.setState({CourseID: response.data[0].CourseID});
-        })
-        .catch((error) => {
-          this.onLoadPanelHiding("Something went wrong", "error");
-          console.log(error);
-        });
-    } else if (res.dismiss == "cancel") {
-      //console.log("cancel");
-    } else if (res.dismiss == "esc") {
-      //console.log("cancle");
+    if (!this.FormLayout.validate().isValid) {
+      this.OnNotification("Fields marked with * are required", "error");
+      return false;
     }
-  });
-}
-};
+    console.log(this.state.jUser.password);
+    //if (this.state.jUser.PasswordChange) {
+    if (
+      this.state.jUser.password == "" ||
+      this.state.jUser.password == NaN ||
+      this.state.jUser.password == undefined
+    ) {
+      this.OnNotification("Password is Required", "error");
+      return false;
+    } else if (matchPassword.test(this.state.jUser.password) == false) {
+      this.OnNotification(
+        "Passwords must contain at least 8 characters, including uppercase, lowercase letters and numbers.",
+        "error"
+      );
+      return false;
+    } else if (this.state.jUser.password != this.state.jUser.ConfirmPassword) {
+      this.OnNotification(
+        "New password & Confirm password must match",
+        "error"
+      );
+      return false;
+    }
+    // }
 
-OnClearForm = () => {
+    return true;
+  };
 
+  SaveData = async (e) => {
+    if (await this.OnSaveValidation()) {
+      Swal.fire({
+        type: "info",
+        showCancelButton: true,
+        text: "Do you want to save ?",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then((res) => {
+        if (res.value) {
+          this.setState({ LoadPanelVisible: true });
+          console.log({
+            firstName: this.state.jUser.firstName,
+            lastName: this.state.jUser.lastName,
+            email: this.state.jUser.email,
+            nic: this.state.jUser.nic,
+            address: this.state.jUser.address,
+            mobileNo: this.state.jUser.mobileNo,
+            dob: this.state.jUser.dob,
+            gender: this.state.jUser.gender,
+            status: this.state.jUser.status,
+            type: 1,
+            roleId: 2,
+          });
+          this.serverRequest = axios
+            .post("http://20.201.121.161:4478/api/User/Register", {
+              firstName: this.state.jUser.firstName,
+              lastName: this.state.jUser.lastName,
+              email: this.state.jUser.email,
+              nic: this.state.jUser.nic,
+              address: this.state.jUser.address,
+              mobileNo: JSON.stringify(this.state.jUser.mobileNo),
+              dob: this.state.jUser.dob,
+              gender: this.state.jUser.gender,
+              status: this.state.jUser.status,
+              type: 1,
+              roleId: 2,
+            })
+            .then((response) => {
+              this.onLoadPanelHiding(response.data, "success");
+              this.OnClearForm();
+              //this.setState({CourseID: response.data[0].CourseID});
+            })
+            .catch((error) => {
+              this.onLoadPanelHiding("Something went wrong", "error");
+              console.log(error);
+            });
+        } else if (res.dismiss == "cancel") {
+          //console.log("cancel");
+        } else if (res.dismiss == "esc") {
+          //console.log("cancle");
+        }
+      });
+    }
+  };
 
-this.setState({
-  UserID: 0,
-  jUser: { Status: 1 },
-  jAuthorization: [],
+  OnClearForm = () => {
+    this.setState({
+      UserID: 0,
+      jUser: { Status: 1 },
+      jAuthorization: [],
 
-  jUserList: [],
+      jUserList: [],
 
-  ListViewing: false,
-  DataLoading: false,
-  PasswordChange: false,
-  IsCashier: false,
-  DocReadOnly: false,
-});
-};
+      ListViewing: false,
+      DataLoading: false,
+      PasswordChange: false,
+      IsCashier: false,
+      DocReadOnly: false,
+    });
+  };
   onValueChanged = (e) => {
     this.state.SelectedSchool = [];
     const newValues = e.value;
@@ -301,8 +297,6 @@ this.setState({
       .catch((error) => console.log(error));
   }
 
-  
-
   onChangePassword = (e) => {
     if (e.value && !this.state.DataLoading) {
       this.setState((prevState) => ({
@@ -316,12 +310,11 @@ this.setState({
     }
   };
 
-
   render() {
     return (
       <Aux>
         <Card title="User">
-        <Form ref={this.FormRef} formData={this.state.jUser}>
+          <Form ref={this.FormRef} formData={this.state.jUser}>
             <GroupItem caption="User Information" colCount={2}>
               <Item
                 dataField="firstName"
@@ -427,7 +420,6 @@ this.setState({
             </GroupItem>
           </Form>
         </Card>
-
 
         <Navbar bg="light" variant="light">
           <Button
