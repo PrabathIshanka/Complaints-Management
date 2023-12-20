@@ -33,9 +33,10 @@ export class ComplainOEnquiry extends Component {
       File: null,
       FileName: null,
       base64Image:null,
+      base64ImageInvestigate:null,
 
       ComplainID: 0,
-      jComplain: { Status: 1 },
+      jComplain: { Status: 0 },
       jCrimeType:[],
       jBranch:[],
       jAuthorization: [],
@@ -47,20 +48,22 @@ export class ComplainOEnquiry extends Component {
       DataLoading: false,
       PasswordChange: false,
       DocReadOnly: false,
+      
+      ItemEnable : true,
     };
 
-    this.Auth = [
-      { ID: 0, Name: "Full Authorization" },
-      { ID: 1, Name: "Read-Only" },
-      { ID: 2, Name: "No Authorization" },
-      { ID: 9, Name: "Various Authorization" },
-    ];
 
     this.Status = [
-      { ID: 1, Name: "Active" },
-      { ID: 2, Name: "Inactive" },
+      { ID: 0, Name: "Reviewing" },
+      { ID: 1, Name: "Assign To Officer" },
+      { ID: 2, Name: "Investigating" },
+      { ID: 3, Name: "Complete" },
+      { ID: 4, Name: "Closed" },
     ];
-
+    this.Institute = [
+      { ID: 0, Name: "Wildlife conservations" },
+      { ID: 1, Name: "Forest conservations" },
+  ];
 
     this.onLoadPanelHiding = this.onLoadPanelHiding.bind(this);
     this.FormRef = React.createRef();
@@ -165,8 +168,14 @@ OnClearForm = () => {console.log(this.state.jComplain.image)
 
 
 this.setState({
+
+  File: null,
+  FileName: null,
+  base64Image:null,
+  base64ImageInvestigate:null,
+
   ComplainID: 0,
-      jComplain: { Status: 1 },
+      jComplain: { Status: 0 },
       jAuthorization: [],
 
       jComplainList: [],
@@ -175,6 +184,7 @@ this.setState({
       DataLoading: false,
       PasswordChange: false,
       DocReadOnly: false,
+      ItemEnable : true,
 });
 };
   
@@ -184,7 +194,7 @@ this.setState({
       if (this.state.ListViewing) {
         //Open
         this.serverRequest = axios
-          .get("http://20.201.121.161:4478/api/Inquiry",{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}})
+          .get("http://20.201.121.161:4478/api/Inquiry/GetAllByUser/"+localStorage.getItem("user"),{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}})
           .then((res) => {
             console.log(res.data);
             this.setState({ jComplainList: res.data });
@@ -195,7 +205,8 @@ this.setState({
       }
       if (!this.state.ListViewing && SelectID != 0) {console.log("TEST SELECTED ID" , SelectID);
         //Close
-        this.setState({ ComplainID: SelectID }, () => this.OnLoadData());
+        this.setState({ ComplainID: SelectID ,
+        ItemEnable:false}, () => this.OnLoadData());
       }
     });
   };
@@ -217,32 +228,23 @@ this.setState({
   };
 
 
-  OnLoadData() {
+  OnLoadData() {console.log(this.state.ComplainID ,this.state.ComplainID!=0 );
     axios
       .all([
-        axios.get("http://20.201.121.161:4478/api/Inquiry",{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}}),
+        axios.get("http://20.201.121.161:4478/api/Inquiry/"+this.state.ComplainID,{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}}),
       ])
       .then(
-        axios.spread((User) => {
+        axios.spread((Complain) => { console.log(Complain.data);
           this.setState({ DataLoading: true }, () =>
             this.setState(
               {
-                jUser: JSON.parse(User.data[0].Users),
-                jAuthorization: JSON.parse(User.data[0].UserWiseAuthontication),
-                jlCachGLAccount: JSON.parse(User.data[0].CashierAccount),
-                PasswordChange: false,
-                IsCashier: JSON.parse(User.data[0].Users).Cashier,
+                jComplain: Complain.data,
+                base64Image : Complain.data.userAttachment,
+                base64ImageInvestigate:Complain.data.investigatingAttachment,
+                ItemEnable:false,
               },
               () =>
-                this.setState(
-                  (prevState) => ({
-                    jUser: {
-                      ...prevState.jUser,
-                      Schools: JSON.parse(User.data[0].UserWiseSchool), //Object.values(User.data[0].UserWiseSchool),
-                    },
-                  }),
-                  () => this.setState({ DataLoading: false })
-                )
+              console.log("HIIIIIIII",this.state.ComplainID)
             )
           );
         })
@@ -258,8 +260,18 @@ this.setState({
         <Card title="Complain">
         <Form ref={this.FormRef} formData={this.state.jComplain}>
             <GroupItem caption="Complain Information" colCount={2}>
-
             <Item
+                dataField="ticketId"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                disabled={true}
+              >
+                <RequiredRule message="Field required" />
+                <Label text="Ticket"></Label>
+              </Item>
+            <Item
+               disabled={this.state.ComplainID!=0}
                 dataField="crimeTypeId"
                 editorType="dxSelectBox"
                 editorOptions={{
@@ -268,6 +280,8 @@ this.setState({
                   displayExpr: "name",
                   valueExpr: "id",
                 }}
+                //visible={this.state.jComplain.Status>0}
+                //disabled={this.state.ItemEnable}
               >
                 <RequiredRule message="Field required" />
               </Item>
@@ -278,8 +292,22 @@ this.setState({
                   items: this.state.jBranch,
                   searchEnabled: true,
                   displayExpr: "name",
-                  valueExpr: "cityId",
+                  valueExpr: "id",
                 }}
+                disabled={this.state.ComplainID!=0}
+              >
+                <RequiredRule message="Field required" />
+              </Item>
+              <Item
+                dataField="institutionId"
+                editorType="dxSelectBox"
+                editorOptions={{
+                  items: this.Institute,
+                  searchEnabled: true,
+                  displayExpr: "Name",
+                  valueExpr: "ID",
+                }}
+                disabled={this.state.ComplainID!=0}
               >
                 <RequiredRule message="Field required" />
               </Item>
@@ -288,12 +316,13 @@ this.setState({
                 editorOptions={{
                   maxLength: 4000,
                 }}
+                disabled={this.state.ComplainID!=0}
               >
                 <RequiredRule message="Field required" />
                 <Label text="Inquiry"></Label>
               </Item>
               <Item
-                dataField="Status"
+                dataField="status"
                 editorType="dxSelectBox"
                 editorOptions={{
                   items: this.Status,
@@ -301,10 +330,59 @@ this.setState({
                   displayExpr: "Name",
                   valueExpr: "ID",
                 }}
+                //visible={this.state.ComplainID!=0}
+                disabled={true}
               >
                 <RequiredRule message="Field required" />
               </Item>
-              <Item>
+              <Item
+                dataField="reviewingResponse"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                visible={false}
+              >
+                <Label text="Reviewing Response"></Label>
+              </Item>
+              <Item
+                dataField="assignResponse"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                visible={false}
+              >
+                <Label text="Assign Response"></Label>
+              </Item>
+              <Item
+                dataField="investigatingResponse"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                visible={false}
+              >
+                <Label text="Investigating Response"></Label>
+              </Item>
+              <Item
+                dataField="completeResponse"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                visible={false}
+              >
+                <Label text="Complete Response"></Label>
+              </Item>
+              <Item
+                dataField="userComment"
+                editorOptions={{
+                  maxLength: 4000,
+                }}
+                visible={false}
+              >
+                <Label text="User Comment"></Label>
+              </Item>
+              <Item 
+               disabled={this.state.ComplainID!=0}
+               >
               <FileUploader
               selectButtonText="Select File"
                   labelText=""
@@ -314,6 +392,22 @@ this.setState({
                   allowCanceling={true}
                   onValueChanged={this.onValueChanged} />
                   <img src={this.state.base64Image} alt="" width="200px" height="200px" />
+                  <Label text="User Attachment"></Label>
+              </Item>
+              <Item 
+               disabled={true}
+               visible={false}
+               >
+              <FileUploader
+              selectButtonText="Select File"
+                  labelText=""
+                  accept="application/x-rpt"
+                  allowedFileExtensions={['.jpg', '.jpeg', '.gif', '.png']}
+                  uploadMode="useForm"
+                  allowCanceling={true}
+                  onValueChanged={this.onValueChanged} />
+                  <img src={this.state.base64ImageInvestigate} alt="" width="200px" height="200px" />
+                  <Label text="Investigating Attachment"></Label>
               </Item>
             </GroupItem>
           </Form>
@@ -324,7 +418,7 @@ this.setState({
           <Button
             variant="secondary"
             onClick={this.SaveData}
-            disabled={this.state.DocReadOnly}
+            disabled={this.state.ComplainID!=0}
           >
             Save
           </Button>

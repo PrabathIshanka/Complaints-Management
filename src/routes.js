@@ -1,5 +1,6 @@
 import React from "react";
 import $ from "jquery";
+import Feedback from "./Forms/Feedback/FeedbackInquiry";
 
 window.jQuery = $;
 window.$ = $;
@@ -7,9 +8,17 @@ global.jQuery = $;
 
 const DashboardDefault = React.lazy(() => import("./Demo/Dashboard/Default"));
 const Notification = React.lazy(() => import("./Forms/Dashboard/Notification"));
+
+////
 const ComplainOEnquiry = React.lazy(() =>
   import("./Forms/Feedback/ComplainOEnquiry")
 );
+const AssignOfficer = React.lazy(() => import("./Forms/Feedback/AssignOfficer"));
+const Investigate = React.lazy(() => import("./Forms/Feedback/Investigate"));
+const CompleteInquiry = React.lazy(() => import("./Forms/Feedback/Complete"));
+const FeedbackInquiry = React.lazy(() => import("./Forms/Feedback/FeedbackInquiry"));
+
+
 const Report = React.lazy(() => import("./Forms/Report/Report"));
 const Users = React.lazy(() => import("./Forms/Admin/Users"));
 const LayoutSetup = React.lazy(() => import("./Forms/Admin/LayoutSetup"));
@@ -43,6 +52,30 @@ const routes = [
     exact: true,
     name: "complainoEnquiry",
     component: ComplainOEnquiry,
+  },
+  {
+    path: "/forms/feedback/assignOfficer",
+    exact: true,
+    name: "assignOfficer",
+    component: AssignOfficer,
+  },
+  {
+    path: "/forms/feedback/investigate",
+    exact: true,
+    name: "investigate",
+    component: Investigate,
+  },
+  {
+    path: "/forms/feedback/completeInquiry",
+    exact: true,
+    name: "completeInquiry",
+    component: CompleteInquiry,
+  },
+  {
+    path: "/forms/feedback/feedbackInquiry",
+    exact: true,
+    name: "feedbackInquiry",
+    component: FeedbackInquiry,
   },
   {
     path: "/forms/report/report",

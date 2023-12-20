@@ -6,6 +6,7 @@ import DataGrid, {
   SearchPanel,
   GroupPanel,
   Paging,
+  Lookup,
 } from "devextreme-react/data-grid";
 
 export class ComplainOEnquiryList extends Component {
@@ -16,6 +17,18 @@ export class ComplainOEnquiryList extends Component {
       viewListSelectedID: 0,
       ComplainInquiryList: [],
     };
+
+    this.Status = [
+      { ID: 0, Name: "Reviewing" },
+      { ID: 1, Name: "Assign To Officer" },
+      { ID: 2, Name: "Investigating" },
+      { ID: 3, Name: "Complete" },
+      { ID: 4, Name: "Closed" },
+    ];
+    this.Institute = [
+      { ID: 0, Name: "Wildlife conservations" },
+      { ID: 1, Name: "Forest conservations" },
+  ];
   }
 
   componentDidMount() { 
@@ -63,10 +76,22 @@ export class ComplainOEnquiryList extends Component {
               <GroupPanel visible={true} />
               <Paging defaultPageSize={12} />
               <Column dataField="id" visible={false} />
-              <Column dataField="crimeTypeId" />
+              <Column dataField="crimeTypeName" />
               <Column dataField="inquiryEntry" />
-              <Column dataField="userComment" />
-              <Column dataField="rating" />
+              <Column dataField="institutionId">
+                            <Lookup
+                                dataSource={this.Institute}
+                                valueExpr="ID"
+                                displayExpr="Name"
+                            />
+                        </Column>
+                        <Column dataField="status">
+                            <Lookup
+                                dataSource={this.Status}
+                                valueExpr="ID"
+                                displayExpr="Name"
+                            />
+                        </Column>
             </DataGrid>
 
             <br></br>

@@ -27,7 +27,7 @@ class NavLeft extends Component {
     return (
       <Aux>
         <ul className="navbar-nav mr-auto">
-          <li>
+          {/* <li>
             <a
               href={DEMO.BLANK_LINK}
               className="full-screen"
@@ -35,9 +35,9 @@ class NavLeft extends Component {
             >
               <i className={iconFullScreen.join(" ")} />
             </a>
-          </li>
+          </li> */}
           <li className={navItemClass.join(" ")}>
-            <Dropdown alignRight={dropdownRightAlign}>
+            {/* <Dropdown alignRight={dropdownRightAlign}>
               <Dropdown.Toggle variant={"link"} id="dropdown-basic">
                 Language
               </Dropdown.Toggle>
@@ -60,10 +60,10 @@ class NavLeft extends Component {
                   </li>
                 </Dropdown.Menu>
               </ul>
-            </Dropdown>
+            </Dropdown> */}
           </li>
           <li className="nav-item">
-            <NavSearch />
+            {/* <NavSearch /> */}
           </li>
         </ul>
       </Aux>
