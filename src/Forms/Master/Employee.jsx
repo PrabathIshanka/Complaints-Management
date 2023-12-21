@@ -28,7 +28,8 @@ export class Employee extends Component {
     this.state = {
       EmployeeID: 0,
       jEmployee: { Status: "Active" },
-      jRoles:[],
+      jRoles: [],
+      jBranch: [],
       jAuthorization: [],
 
       jEmployeeList: [],
@@ -40,7 +41,6 @@ export class Employee extends Component {
       DocReadOnly: false,
     };
 
-
     this.Status = [
       { ID: "Active", Name: "Active" },
       { ID: "Inactive", Name: "Inactive" },
@@ -49,6 +49,10 @@ export class Employee extends Component {
     this.Gender = [
       { ID: "Male", Name: "Male" },
       { ID: "Female", Name: "Female" },
+    ];
+    this.Institute = [
+      { ID: 0, Name: "Wildlife conservations" },
+      { ID: 1, Name: "Forest conservations" },
     ];
 
     this.onLoadPanelHiding = this.onLoadPanelHiding.bind(this);
@@ -67,23 +71,30 @@ export class Employee extends Component {
     //       (item) => item.MenuID === 9001
     //     ).Auth === 1;*/
     // };
-    
+
     axios
       .all([
-         axios.get("http://20.201.121.161:4478/api/Role",{headers:{Authorization : ("Bearer "+localStorage.getItem("token"))}}),
+        axios.get("http://20.201.121.161:4478/api/Role", {
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+        }),
+        axios.get("http://20.201.121.161:4478/api/Branch", {
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+        }),
         // axios.get("/api/user-auth-tree"),
       ])
       .then(
-      axios.spread((JobRoles) => { console.log("jRoles", JobRoles)
-        this.setState(
-          {
-            jRoles: JobRoles.data,
-          },
-          () => console.log("jRoles", this.state.jRoles)
-        );
-      }))
+        axios.spread((JobRoles, Branch) => {
+          console.log("jRoles", JobRoles);
+          this.setState(
+            {
+              jRoles: JobRoles.data,
+              jBranch: Branch.data,
+            },
+            () => console.log("jRoles", this.state.jRoles)
+          );
+        })
+      )
       .catch((error) => console.log(error));
-    
   };
 
   onLoadPanelHiding = (message, type) => {
@@ -106,8 +117,6 @@ export class Employee extends Component {
   OnClickEvent = () => {};
 
   OnSaveValidation = async () => {
-     
-
     return true;
   };
 
@@ -137,29 +146,35 @@ export class Employee extends Component {
             type: 0,
             roleId: this.state.jEmployee.roleId,
             branchId: 2,
-            designation:this.state.jEmployee.designation ,
+            designation: this.state.jEmployee.designation,
             changePassword: false,
-          } );
+          });
           this.serverRequest = axios
-            .post("http://20.201.121.161:4478/api/Employee",
+            .post(
+              "http://20.201.121.161:4478/api/Employee",
               {
-              firstName: this.state.jEmployee.firstName,
-              lastName: this.state.jEmployee.lastName,
-              email: this.state.jEmployee.email,
-              nic: this.state.jEmployee.nic,
-              address: this.state.jEmployee.address,
-              mobileNo: JSON.stringify( this.state.jEmployee.mobileNo),
-              dob: this.state.jEmployee.dob,
-              gender: this.state.jEmployee.gender,
-              status: this.state.jEmployee.status,
-              type: 0,
-              roleId: this.state.jEmployee.roleId,
-              branchId: 2,
-              designation:this.state.jEmployee.designation ,
-              changePassword: false,
-            } , 
-              {headers:{Authorization : ("Bearer "+localStorage.getItem("token")),
-              'Content-Type': 'application/json',}})
+                firstName: this.state.jEmployee.firstName,
+                lastName: this.state.jEmployee.lastName,
+                email: this.state.jEmployee.email,
+                nic: this.state.jEmployee.nic,
+                address: this.state.jEmployee.address,
+                mobileNo: JSON.stringify(this.state.jEmployee.mobileNo),
+                dob: this.state.jEmployee.dob,
+                gender: this.state.jEmployee.gender,
+                status: this.state.jEmployee.status,
+                type: 0,
+                roleId: this.state.jEmployee.roleId,
+                branchId: 2,
+                designation: this.state.jEmployee.designation,
+                changePassword: false,
+              },
+              {
+                headers: {
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                  "Content-Type": "application/json",
+                },
+              }
+            )
             .then((response) => {
               this.onLoadPanelHiding(response.data.email, "success");
               this.OnClearForm();
@@ -167,7 +182,7 @@ export class Employee extends Component {
             })
             .catch((error) => {
               this.onLoadPanelHiding("Something went wrong", "error");
-              console.log("Error",error);
+              console.log("Error", error);
             });
         } else if (res.dismiss == "cancel") {
           //console.log("cancel");
@@ -178,16 +193,16 @@ export class Employee extends Component {
     }
   };
 
-  OnClearForm = () => {console.log("cleared");
+  OnClearForm = () => {
+    console.log("cleared");
     let auth = this.state.jAuthorization;
 
     //auth = auth.map((el) => (el.Auth !== 2 ? { ...el, Auth: 2 } : el));
 
-
     this.setState({
       EmployeeID: 0,
       jEmployee: { Status: "Active" },
-      jRoles:[],
+      jRoles: [],
       jAuthorization: [],
 
       jEmployeeList: [],
@@ -260,8 +275,6 @@ export class Employee extends Component {
       .catch((error) => console.log(error));
   }
 
- 
-
   onRowUpdating = (e) => {
     if (e.newData.Auth === 9) {
       e.cancel = true;
@@ -308,7 +321,7 @@ export class Employee extends Component {
         auth = auth.map((el) =>
           el.MenuID === e.data.RootParent ? { ...el, Auth: e.data.Auth } : el
         );
-      else    
+      else
         auth = auth.map((el) =>
           el.MenuID === e.data.RootParent ? { ...el, Auth: 9 } : el
         );
@@ -403,7 +416,7 @@ export class Employee extends Component {
                   valueExpr: "id",
                 }}
               >
-              <Label text="Job Role" />
+                <Label text="Job Role" />
                 <RequiredRule message="Field required" />
               </Item>
 
@@ -411,17 +424,16 @@ export class Employee extends Component {
                 dataField="branchId"
                 editorType="dxSelectBox"
                 editorOptions={{
-                  items: this.state.jRoles,
+                  items: this.state.jBranch,
                   searchEnabled: true,
                   displayExpr: "name",
                   valueExpr: "id",
                 }}
               >
-              <Label text="Instititution" />
+                <Label text="Branch" />
                 <RequiredRule message="Field required" />
               </Item>
 
-              
               <Item
                 dataField="designation"
                 editorOptions={{
@@ -445,7 +457,6 @@ export class Employee extends Component {
             </GroupItem>
           </Form>
         </Card>
-
 
         <Navbar bg="light" variant="light">
           <Button

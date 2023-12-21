@@ -80,7 +80,7 @@ class Breadcrumb extends Component {
                       </Link>
                     </li>
                     {main}
-                    {item}
+                    {/* {item} */}
                   </ul>
                 </div>
               </div>

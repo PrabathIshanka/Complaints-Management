@@ -45,9 +45,7 @@ class SignUp1 extends Component {
                   <div className="mb-4">
                     <i className="feather icon-unlock auth-icon" />
                   </div>
-                  <h3 className="mb-4">
-                  Software Development Practices
-                  </h3>
+                  <h3 className="mb-4">Software Development Practices</h3>
                   {/* <p>{this.props.data.error}</p> */}
 
                   <div className="input-group mb-3">
@@ -90,7 +88,7 @@ class SignUp1 extends Component {
                         this.props.fetchLoginData(
                           this.state.email,
                           this.state.password
-                        )
+                        );
                       } else {
                         this.OnNotification(
                           "Invalid User Name or Passrwod",
@@ -101,11 +99,13 @@ class SignUp1 extends Component {
                   >
                     Login
                   </button>
-                  <p className="mb-0 text-muted">Don’t have an account? <NavLink to="/auth/signup-1">Signup</NavLink></p>
+                  <p className="mb-0 text-muted">
+                    Don’t have an account?{" "}
+                    <NavLink to="/auth/signup-1">Signup</NavLink>
+                  </p>
 
                   <p className="mb-0 text-muted">
-                    Design and Developed by: Team Trojans
-                    (Pvt) Ltd
+                    Design and Developed by: Team Trojans (Pvt) Ltd
                   </p>
                   <p className="mb-0 text-muted">Version 1.0.0</p>
                 </div>
